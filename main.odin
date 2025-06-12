@@ -10,11 +10,11 @@ SCREEN_HEIGHT :: 900
 main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Draftformer")
 	defer rl.CloseWindow()
-	map_state: MapScreenState
+	map_state:= make_map_state()
 
 	main_block: for !rl.WindowShouldClose() {
-		rl.BeginDrawing()
-		rl.ClearBackground({255,211,172,255})
+
+		frametime:= rl.GetFrameTime()
 
 		cursor_movement: Tile
 		x,y: f32
@@ -37,7 +37,11 @@ main :: proc() {
 			cursor_movement.y = i16(y)
 			move_cursor(&map_state,cursor_movement)
 		}
+		handle_cursor(&map_state, frametime)
 
+		// Drawing
+		rl.BeginDrawing()
+		rl.ClearBackground({255,211,172,255})
 		draw_map(map_state)
 		rl.EndDrawing()
 	}
