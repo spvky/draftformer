@@ -11,6 +11,7 @@ main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Draftformer")
 	defer rl.CloseWindow()
 	map_state:= make_map_state()
+	defer delete_map_state(map_state)
 
 	main_block: for !rl.WindowShouldClose() {
 

@@ -32,14 +32,20 @@ MapScreenState :: struct {
 	cursor_displayed_vec_pos: Vec2,
 	cursor_vec_pos: Vec2,
 	held_tile: Maybe(^RoomTile),
+	occupied_tiles: map[Tile]bool
 }
 
 make_map_state :: proc() -> MapScreenState {
 	starting_pos:= grid_to_screen_pos(Tile{0,0})
+	occupied_tiles:= make(map[Tile]bool, 100)
 	return MapScreenState {
 		cursor_displayed_vec_pos = starting_pos,
 		cursor_vec_pos = starting_pos,
 	}
+}
+
+delete_map_state :: proc(map_state: MapScreenState) {
+	delete(map_state.occupied_tiles)
 }
 
 move_cursor :: proc(using map_state: ^MapScreenState, delta: Tile) {
