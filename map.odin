@@ -13,12 +13,13 @@ AreaTag :: enum {
 }
 
 TILE_SIZE :: [2]f32 {64,64}
+SHADOW_OFFSET :: [2]f32{10,-10}
 
 Tile :: [2]i16
 
 RoomTile :: struct {
 	area: AreaTag,
-	grid_positions: sa.Small_Array(100,Tile),
+	tiles: sa.Small_Array(100,Tile),
 	name: string,
 }
 
@@ -31,16 +32,29 @@ MapScreenState :: struct {
 	cursor_position: Tile,
 	cursor_displayed_vec_pos: Vec2,
 	cursor_vec_pos: Vec2,
-	held_tile: Maybe(^RoomTile),
+	held_tile: Maybe(RoomTile),
 	occupied_tiles: map[Tile]bool
 }
 
 make_map_state :: proc() -> MapScreenState {
 	starting_pos:= grid_to_screen_pos(Tile{0,0})
 	occupied_tiles:= make(map[Tile]bool, 100)
+	tiles:= [?]Tile{
+		{0,0},
+		{1,0},
+		{2,0},
+		{3,0},
+		{3,-1},
+		{0,-1},
+		{2,1}
+	}
+	tiles_sa: sa.Small_Array(100, Tile)
+	sa.append_elems(&tiles_sa, ..tiles[:])
+	room_tile:= RoomTile { tiles = tiles_sa}
 	return MapScreenState {
 		cursor_displayed_vec_pos = starting_pos,
 		cursor_vec_pos = starting_pos,
+		held_tile = room_tile
 	}
 }
 
@@ -78,8 +92,12 @@ grid_to_screen_pos :: proc(tile: Tile) -> Vec2 {
 }
 
 draw_cursor :: proc(map_state: MapScreenState) {
+	if room_tile, ok := map_state.held_tile.?; ok {
+		draw_room_tile(map_state.cursor_displayed_vec_pos, room_tile)
+	} else {
 	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos, TILE_SIZE, {0,0,0,100})
-	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos + {10,-10}, TILE_SIZE, {0,86,214,255})
+	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos + SHADOW_OFFSET, TILE_SIZE, {0,86,214,255})
+	}
 }
 
 draw_map_grid :: proc() {
@@ -91,6 +109,17 @@ handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 20)
 	} else {
 		map_state.cursor_displayed_vec_pos = map_state.cursor_vec_pos
+	}
+}
+
+draw_room_tile :: proc(origin: Vec2, room: RoomTile) {
+	for i in 0..<sa.len(room.tiles) {
+		position:= origin + grid_to_vec(sa.get(room.tiles,i))
+		rl.DrawRectangleV(position, TILE_SIZE, {0,0, 0, 100})
+	}
+	for i in 0..<sa.len(room.tiles) {
+		position:= origin + grid_to_vec(sa.get(room.tiles,i))
+		rl.DrawRectangleV(position + SHADOW_OFFSET, TILE_SIZE, {0,86,214,255})
 	}
 }
 
