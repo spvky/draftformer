@@ -51,32 +51,38 @@ rotate_room :: proc(map_state: ^MapScreenState) {
 	}
 }
 
-place_room :: proc(map_state: ^MapScreenState, room: MapRoom) -> bool {
-	collision: bool
+valid_room_placement :: proc(map_state: MapScreenState, room: MapRoom) -> bool {
 	tile_iterator := tile_make_iter(room.tiles, room.rotation)
 
 	for tile in iter_tiles(&tile_iterator) {
 		for position in map_state.occupied_tiles {
 			if tile == position {
-				collision = true
+				return true
 			}
 		}
 	}
+	return false
+}
+
+place_room :: proc(map_state: ^MapScreenState, room: ^MapRoom) -> bool {
+	tile_iterator := tile_make_iter(room.tiles, room.rotation)
+	collision := valid_room_placement(map_state^, room^)
+
 	if !collision do return false
 
 	for tile in iter_tiles(&tile_iterator) {
 		map_state.occupied_tiles[tile] = {}
 	}
-
+	room.placed =  true
 	return true
 }
 
-remove_room :: proc(map_state: ^MapScreenState, room: MapRoom) {
+pickup_room :: proc(map_state: ^MapScreenState, room: ^MapRoom) {
 	tile_iterator := tile_make_iter(room.tiles, room.rotation)
 	for tile in iter_tiles(&tile_iterator) {
 		delete_key(&map_state.occupied_tiles, tile)
 	}
-	
+	room.placed =  false
 }
 
 draw_map_room :: proc(origin: Vec2, room: MapRoom) {
