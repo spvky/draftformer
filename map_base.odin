@@ -5,6 +5,8 @@ import rl "vendor:raylib"
 import sa "core:container/small_array"
 import l "core:math/linalg"
 
+MAP_OFFSET :Vec2 : {400,200}
+
 AreaTag :: enum {
 	Basic,
 	Tech,
@@ -162,7 +164,7 @@ handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 
 draw_cursor :: proc(map_state: MapScreenState) {
 	if room, ok := sa.get_safe(map_state.rooms,map_state.held_room_index); ok {
-		draw_map_room(map_state.cursor_displayed_vec_pos, room)
+		draw_map_room(map_state, room)
 	} else {
 	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos, TILE_SIZE, {0,0,0,100})
 	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos + SHADOW_OFFSET, TILE_SIZE, {0,86,214,255})
@@ -170,7 +172,7 @@ draw_cursor :: proc(map_state: MapScreenState) {
 }
 
 draw_map_grid :: proc() {
-	rl.DrawRectangleV({400,200}, {TILE_SIZE.x * 10,TILE_SIZE.y * 10}, {128,128,128,100})
+	rl.DrawRectangleV(MAP_OFFSET, {TILE_SIZE.x * 10,TILE_SIZE.y * 10}, {128,128,128,100})
 }
 
 

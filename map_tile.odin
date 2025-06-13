@@ -16,12 +16,13 @@ TileSet :: map[Tile]struct{}
 TileIter :: struct {
 	tiles: TileArray,
 	rotation: i8,
+	origin: Tile,
 	index: int,
 }
 
 // Create a tile iter from a Small_Array(Tile)
-tile_make_iter :: proc(tiles: TileArray, rotation: i8 = 0) -> TileIter {
-	return TileIter {tiles = tiles, rotation = rotation}
+tile_make_iter :: proc(tiles: TileArray, origin: Tile = {0,0}, rotation: i8 = 0) -> TileIter {
+	return TileIter {tiles = tiles, origin = origin, rotation = rotation}
 }
 
 // Iterate through a tile iter, notably does not consume the iter
@@ -32,13 +33,13 @@ iter_tiles :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
 		raw_val := sa.get(it.tiles, it.index)
 		switch it.rotation {
 			case 0:
-				val = raw_val
+				val = it.origin + raw_val
 			case 1:
-				val = {-raw_val.y, raw_val.x}
+				val = it.origin + {-raw_val.y, raw_val.x}
 			case 2:
-				val = {-raw_val.x, -raw_val.y}
+				val = it.origin + {-raw_val.x, -raw_val.y}
 			case 3:
-				val = {raw_val.y, -raw_val.x}
+				val = it.origin + {raw_val.y, -raw_val.x}
 		}
 		cond = true
 		it.index += 1
