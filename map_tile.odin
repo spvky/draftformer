@@ -11,19 +11,21 @@ SHADOW_OFFSET :: [2]f32{-10,10}
 Tile :: [2]i16
 TileArray :: sa.Small_Array(100,Tile)
 TileSet :: map[Tile]struct{}
+
+// Struct for easily iterating tiles, while respecting rotation
 TileIter :: struct {
 	tiles: TileArray,
 	rotation: i8,
 	index: int,
 }
 
-
-
-tile_make_iter :: proc(tiles: TileArray, rotation: i8) -> TileIter {
+// Create a tile iter from a Small_Array(Tile)
+tile_make_iter :: proc(tiles: TileArray, rotation: i8 = 0) -> TileIter {
 	return TileIter {tiles = tiles, rotation = rotation}
 }
 
-tile_iter :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
+// Iterate through a tile iter, notably does not consume the iter
+iter_tiles :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
 	in_range := it.index < sa.len(it.tiles)
 
 	for in_range {
@@ -43,16 +45,17 @@ tile_iter :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
 		return
 	}
 
+	// When we have no more tiles left to iterate, reset the index, to allow reuse of the iterator
 	it.index = 0
 	return
 }
 
 
-grid_to_vec :: proc(tile: Tile) -> Vec2 {
+tile_to_vec :: proc(tile: Tile) -> Vec2 {
 	return Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
 }
 
-grid_to_screen_pos :: proc(tile: Tile) -> Vec2 {
+tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
 	map_start:= Vec2{400,200}
-	return map_start + grid_to_vec(tile)
+	return map_start + tile_to_vec(tile)
 }

@@ -55,6 +55,7 @@ main :: proc() {
 			cursor_movement.y = i16(y)
 			move_cursor(&map_state,cursor_movement)
 		}
+		select_room(&map_state)
 		rotate_room(&map_state)
 		handle_cursor(&map_state, frametime)
 
