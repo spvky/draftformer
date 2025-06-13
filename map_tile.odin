@@ -1,0 +1,58 @@
+package main
+
+import "core:fmt"
+import rl "vendor:raylib"
+import sa "core:container/small_array"
+import l "core:math/linalg"
+
+TILE_SIZE :: [2]f32 {64,64}
+SHADOW_OFFSET :: [2]f32{-10,10}
+
+Tile :: [2]i16
+TileArray :: sa.Small_Array(100,Tile)
+TileSet :: map[Tile]struct{}
+TileIter :: struct {
+	tiles: TileArray,
+	rotation: i8,
+	index: int,
+}
+
+
+
+tile_make_iter :: proc(tiles: TileArray, rotation: i8) -> TileIter {
+	return TileIter {tiles = tiles, rotation = rotation}
+}
+
+tile_iter :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
+	in_range := it.index < sa.len(it.tiles)
+
+	for in_range {
+		raw_val := sa.get(it.tiles, it.index)
+		switch it.rotation {
+			case 0:
+				val = raw_val
+			case 1:
+				val = {-raw_val.y, raw_val.x}
+			case 2:
+				val = {-raw_val.x, -raw_val.y}
+			case 3:
+				val = {raw_val.y, -raw_val.x}
+		}
+		cond = true
+		it.index += 1
+		return
+	}
+
+	it.index = 0
+	return
+}
+
+
+grid_to_vec :: proc(tile: Tile) -> Vec2 {
+	return Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
+}
+
+grid_to_screen_pos :: proc(tile: Tile) -> Vec2 {
+	map_start:= Vec2{400,200}
+	return map_start + grid_to_vec(tile)
+}
