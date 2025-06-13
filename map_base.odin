@@ -121,6 +121,7 @@ delete_map_state :: proc(map_state: MapScreenState) {
 	delete(map_state.occupied_tiles)
 }
 
+// Move the cursor around the map screen
 move_cursor :: proc(using map_state: ^MapScreenState, delta: Tile) {
 	cursor_position += delta
 	if cursor_position.x < 0 {
@@ -143,9 +144,19 @@ move_cursor :: proc(using map_state: ^MapScreenState, delta: Tile) {
 	map_state.cursor_vec_pos = tile_to_screen_pos(map_state.cursor_position)
 }
 
+// Cycle through available rooms
 select_room :: proc(map_state: ^MapScreenState) {
 	if rl.IsKeyPressed(.F) do increase_held_index(map_state)
 	if rl.IsKeyPressed(.G) do increase_held_index(map_state)
+}
+
+// Handles the cursor lerping to it's desired location
+handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
+	if l.distance(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos) > 2.0 {
+		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 20)
+	} else {
+		map_state.cursor_displayed_vec_pos = map_state.cursor_vec_pos
+	}
 }
 
 
@@ -162,11 +173,4 @@ draw_map_grid :: proc() {
 	rl.DrawRectangleV({400,200}, {TILE_SIZE.x * 10,TILE_SIZE.y * 10}, {128,128,128,100})
 }
 
-handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
-	if l.distance(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos) > 2.0 {
-		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 20)
-	} else {
-		map_state.cursor_displayed_vec_pos = map_state.cursor_vec_pos
-	}
-}
 
