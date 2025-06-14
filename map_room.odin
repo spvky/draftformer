@@ -68,7 +68,9 @@ tiles_colliding :: proc(map_state: MapScreenState, tile_iterator: ^TileIter) -> 
 	return false
 }
 
-place_room :: proc(map_state: ^MapScreenState, room: ^MapRoom) -> bool {
+place_room :: proc(map_state: ^MapScreenState) -> bool {
+	room, ok := get_held_room_ptr(map_state)
+	if !ok do return false
 	tile_iterator := tile_make_iter(room.tiles, map_state.cursor_position, room.rotation)
 	collision := tiles_colliding(map_state^, &tile_iterator)
 
@@ -77,6 +79,8 @@ place_room :: proc(map_state: ^MapScreenState, room: ^MapRoom) -> bool {
 	for tile in iter_tiles(&tile_iterator) {
 		map_state.occupied_tiles[tile] = {}
 	}
+	sa.append(&map_state.display_map.placed_rooms, PlacedRoom{room =room^, origin = map_state.cursor_position})
+	increase_held_index(map_state)
 	room.placed =  true
 	return true
 }

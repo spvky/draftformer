@@ -24,10 +24,22 @@ MapScreenState :: struct {
 	cursor_displayed_vec_pos: Vec2,
 	cursor_vec_pos: Vec2,
 	rooms: RoomArray,
+	display_map: DisplayMap,
 	rooms_iter: RoomIter,
 	held_room_index: int,
 	occupied_tiles: TileSet
 }
+
+DisplayMap :: struct {
+	placed_rooms: PlacedRoomArray
+}
+
+PlacedRoom :: struct {
+	using room: MapRoom,
+	origin: Tile
+}
+
+PlacedRoomArray :: sa.Small_Array(20,PlacedRoom)
 
 get_held_room :: proc(state: MapScreenState) -> (val: MapRoom, cond: bool) {
 	room, ok := sa.get_safe(state.rooms, state.held_room_index); if ok {
@@ -84,6 +96,7 @@ decrease_held_index :: proc(state: ^MapScreenState) {
 
 draw_map :: proc(map_state: MapScreenState) {
 	draw_map_grid()
+	draw_placed_rooms(map_state)
 	draw_cursor(map_state)
 }
 
@@ -161,6 +174,38 @@ handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 	}
 }
 
+map_controls :: proc(map_state: ^MapScreenState, frametime: f32) {
+	cursor_movement: Tile
+	x,y: f32
+
+	if rl.IsKeyPressed(.A) {
+		x -= 1
+	}
+	if rl.IsKeyPressed(.D) {
+		x += 1
+	}
+	if rl.IsKeyPressed(.W) {
+		y -= 1
+	}
+	if rl.IsKeyPressed(.S) {
+		y += 1
+	}
+
+	if x != 0 || y != 0 { 
+		cursor_movement.x = i16(x)
+		cursor_movement.y = i16(y)
+		move_cursor(map_state,cursor_movement)
+	}
+
+	if rl.IsKeyPressed(.ENTER) {
+		can_place_room := place_room(map_state)
+		if !can_place_room do fmt.println("Cannot place room")
+	}
+	select_room(map_state)
+	rotate_room(map_state)
+	handle_cursor(map_state, frametime)
+}
+
 
 draw_cursor :: proc(map_state: MapScreenState) {
 	if room, ok := sa.get_safe(map_state.rooms,map_state.held_room_index); ok {
@@ -170,6 +215,19 @@ draw_cursor :: proc(map_state: MapScreenState) {
 	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos + SHADOW_OFFSET, TILE_SIZE, {0,86,214,255})
 	}
 }
+
+draw_placed_rooms :: proc(map_state: MapScreenState) {
+	for i in 0..<sa.len(map_state.display_map.placed_rooms) {
+		if placed_room, ok := sa.get_safe(map_state.display_map.placed_rooms, i); ok {
+			tile_iter := tile_make_iter(tiles = placed_room.tiles, origin = placed_room.origin, rotation = placed_room.rotation)
+			for tile in iter_tiles(&tile_iter) {
+				position:= MAP_OFFSET + tile_to_vec(tile)
+				rl.DrawRectangleV(position, TILE_SIZE, ROOM_COLOR)
+			}
+		}
+	}
+}
+
 
 draw_map_grid :: proc() {
 	rl.DrawRectangleV(MAP_OFFSET, {TILE_SIZE.x * 10,TILE_SIZE.y * 10}, {128,128,128,100})

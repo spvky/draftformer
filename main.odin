@@ -34,30 +34,7 @@ main :: proc() {
 
 		frametime:= rl.GetFrameTime()
 
-		cursor_movement: Tile
-		x,y: f32
-
-		if rl.IsKeyPressed(.A) {
-			x -= 1
-		}
-		if rl.IsKeyPressed(.D) {
-			x += 1
-		}
-		if rl.IsKeyPressed(.W) {
-			y -= 1
-		}
-		if rl.IsKeyPressed(.S) {
-			y += 1
-		}
-
-		if x != 0 || y != 0 { 
-			cursor_movement.x = i16(x)
-			cursor_movement.y = i16(y)
-			move_cursor(&map_state,cursor_movement)
-		}
-		select_room(&map_state)
-		rotate_room(&map_state)
-		handle_cursor(&map_state, frametime)
+		map_controls(&map_state, frametime)
 
 		// Drawing
 		rl.BeginDrawing()
