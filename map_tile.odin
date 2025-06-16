@@ -5,7 +5,7 @@ import rl "vendor:raylib"
 import sa "core:container/small_array"
 import l "core:math/linalg"
 
-TILE_SIZE :: [2]f32 {64,64}
+TILE_SIZE :: [2]f32 {48,48}
 SHADOW_OFFSET :: [2]f32{-10,10}
 
 Tile :: [2]i16
@@ -29,50 +29,48 @@ TileExits :: struct {
 	west: bool
 }
 
-// Create a tile iter from a Small_Array(Tile)
-tile_make_iter :: proc(tiles: TileArray, origin: Tile = {0,0}, rotation: i8 = 0) -> TileIter {
-	return TileIter {tiles = tiles, origin = origin, rotation = rotation}
+CellIter :: struct {
+	cells: CellArray,
+	rotation: i8,
+	origin: Tile,
+	index: int,
 }
 
-get_tile_exits :: proc(tile: Tile, tile_array: TileArray) -> TileExits {
-	length:= sa.len(tile_array)
-	exits: TileExits
-	for i in 0..<length {
-		tile_to_check := sa.get(tile_array,i)
-		if tile_to_check == (tile + Tile{1,0}) {
-			exits.west = true
-		}
-		if tile_to_check == (tile + Tile{-1,0}) {
-			exits.east = true
-		}
-		if tile_to_check == (tile + Tile{0,1}) {
-			exits.north = true
-		}
-		if tile_to_check == (tile + Tile{0,-1}) {
-			exits.south = true
-		}
-	}
-	return exits
+// Create a cell iter from a Small_Array(Cell)
+cell_make_iter :: proc(cells: CellArray, origin: Tile = {0,0}, rotation: i8 = 0) -> CellIter {
+	return CellIter {cells = cells, origin = origin, rotation = rotation}
 }
 
-// Iterate through a tile iter, notably does not consume the iter
-iter_tiles :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
-	in_range := it.index < sa.len(it.tiles)
+// Iterate through a cell iter, notably does not consume the iter
+iter_cell :: proc(it: ^CellIter) -> (val: Cell, cond: bool) {
+	in_range := it.index < sa.len(it.cells)
 
 	for in_range {
-		raw_val := sa.get(it.tiles, it.index)
+		cell := sa.get(it.cells, it.index)
+		cell_pixels := cell.pixels
+		raw_val:= cell.location
+		location: Tile
 		switch it.rotation {
 			case 0:
-				val = it.origin + raw_val
+				 location = it.origin + raw_val
 			case 1:
-				val = it.origin + {-raw_val.y, raw_val.x}
+				location = it.origin + {-raw_val.y, raw_val.x}
+				rotate_pixels90(&cell_pixels)
 			case 2:
-				val = it.origin + {-raw_val.x, -raw_val.y}
+				location = it.origin + {-raw_val.x, -raw_val.y}
+				rotate_pixels90(&cell_pixels)
+				rotate_pixels90(&cell_pixels)
 			case 3:
-				val = it.origin + {raw_val.y, -raw_val.x}
+				location = it.origin + {raw_val.y, -raw_val.x}
+				rotate_pixels90(&cell_pixels)
+				rotate_pixels90(&cell_pixels)
+				rotate_pixels90(&cell_pixels)
 		}
 		cond = true
 		it.index += 1
+		val = Cell {
+			location = location, pixels = cell_pixels
+		}
 		return
 	}
 
@@ -81,12 +79,32 @@ iter_tiles :: proc(it: ^TileIter) -> (val: Tile, cond: bool) {
 	return
 }
 
-
 tile_to_vec :: proc(tile: Tile) -> Vec2 {
 	return Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
 }
 
+// cell_to_vec :: proc(cell: Cell) -> Vec2 {
+	
+// }
+
 tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
 	map_start:= Vec2{400,200}
 	return map_start + tile_to_vec(tile)
+}
+
+
+rotate_pixels90 :: proc(pixels: ^[12][12]u8) {
+    for i in 0..<12 {
+        for j in i+1..<12 {
+          pixels[i][j], pixels[j][i] = pixels[j][i], pixels[i][j]
+        }
+    }
+    for i in 0..<12 {
+			start, end := 0,11
+			for start < end {
+					pixels[i][start], pixels[i][end] = pixels[i][end], pixels[i][start]
+				start += 1
+				end -= 1
+			}
+		}
 }

@@ -25,7 +25,6 @@ MapScreenState :: struct {
 	cursor_vec_pos: Vec2,
 	rooms: RoomArray,
 	display_map: DisplayMap,
-	rooms_iter: RoomIter,
 	held_room_index: int,
 	occupied_tiles: TileSet
 }
@@ -103,28 +102,13 @@ draw_map :: proc(map_state: MapScreenState) {
 make_map_state :: proc() -> MapScreenState {
 	starting_pos:= tile_to_screen_pos(Tile{0,0})
 	occupied_tiles:= make(map[Tile]bool, 100)
-	room_1:= room_make(
-		{0,0},
-		{1,0},
-		{2,0},
-		{3,0},
-		{3,-1},
-		{0,-1},
-		{2,1}
-	)
-
-	room_2:= room_make(
-		{0,0},
-		{1,0},
-		{2,0},
-		{3,0},
-		{4,0},
-		{4,-1},
-		{4,-2}
-	)
+	room_cells:= read_room(.C)
+	room := MapRoom {
+		cells = room_cells
+	}
 
 	rooms: RoomArray
-	sa.append_elems(&rooms, room_1, room_2)
+	sa.append_elems(&rooms, room)
 	return MapScreenState {
 		cursor_displayed_vec_pos = starting_pos,
 		cursor_vec_pos = starting_pos,
@@ -219,9 +203,9 @@ draw_cursor :: proc(map_state: MapScreenState) {
 draw_placed_rooms :: proc(map_state: MapScreenState) {
 	for i in 0..<sa.len(map_state.display_map.placed_rooms) {
 		if placed_room, ok := sa.get_safe(map_state.display_map.placed_rooms, i); ok {
-			tile_iter := tile_make_iter(tiles = placed_room.tiles, origin = placed_room.origin, rotation = placed_room.rotation)
-			for tile in iter_tiles(&tile_iter) {
-				position:= MAP_OFFSET + tile_to_vec(tile)
+			cell_iter := cell_make_iter(cells = placed_room.cells, origin = placed_room.origin, rotation = placed_room.rotation)
+			for cell in iter_cell(&cell_iter) {
+				position:= MAP_OFFSET + tile_to_vec(cell.location)
 				rl.DrawRectangleV(position, TILE_SIZE, ROOM_COLOR)
 			}
 		}

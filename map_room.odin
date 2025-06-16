@@ -13,23 +13,25 @@ RoomArray :: sa.Small_Array(20, MapRoom)
 
 MapRoom :: struct {
 	area: AreaTag,
-	tiles: sa.Small_Array(100,Tile),
+	cells: CellArray,
 	name: string,
 	rotation: i8, // 0 = 0, 1 = 90, 2 = 180, 3 = 270
 	placed: bool,
 	static: bool
 }
 
-RoomIter :: struct {
-	rooms: RoomArray,
-	index: int,
+RoomTag :: enum {
+	A,
+	B,
+	C
 }
 
-room_make :: proc(tiles: ..Tile) -> MapRoom {
-	room_tiles: sa.Small_Array(100, Tile)
-	sa.append_elems(&room_tiles, ..tiles)
-	return MapRoom { tiles = room_tiles}
+Cell :: struct {
+	location: Tile,
+	pixels: [12][12]u8
 }
+CellArray :: sa.Small_Array(20,Cell)
+
 
 
 rotate_room :: proc(map_state: ^MapScreenState) {
@@ -40,10 +42,6 @@ rotate_room :: proc(map_state: ^MapScreenState) {
 				new_rotation = 0
 			}
 			room.rotation = new_rotation
-			tile_iter := tile_make_iter(room.tiles, map_state.cursor_position, new_rotation)
-			for tile in iter_tiles(&tile_iter) {
-				fmt.printfln("Tile true pos: %v", tile)
-			}
 		}
 
 		if rl.IsKeyPressed(.Q) {
@@ -56,8 +54,9 @@ rotate_room :: proc(map_state: ^MapScreenState) {
 	}
 }
 
-tiles_colliding :: proc(map_state: MapScreenState, tile_iterator: ^TileIter) -> bool {
-	for tile in iter_tiles(tile_iterator) {
+tiles_colliding :: proc(map_state: MapScreenState, cell_iterator: ^CellIter) -> bool {
+	for cell in iter_cell(cell_iterator) {
+		tile := cell.location
 		if tile.x < 0 || tile.y < 0 || tile.x > 9 || tile.y > 9 do return true
 		for position in map_state.occupied_tiles {
 			if tile == position   {
@@ -71,13 +70,13 @@ tiles_colliding :: proc(map_state: MapScreenState, tile_iterator: ^TileIter) -> 
 place_room :: proc(map_state: ^MapScreenState) -> bool {
 	room, ok := get_held_room_ptr(map_state)
 	if !ok do return false
-	tile_iterator := tile_make_iter(room.tiles, map_state.cursor_position, room.rotation)
-	collision := tiles_colliding(map_state^, &tile_iterator)
+	cell_iterator := cell_make_iter(room.cells, map_state.cursor_position, room.rotation)
+	collision := tiles_colliding(map_state^, &cell_iterator)
 
 	if collision do return false
 
-	for tile in iter_tiles(&tile_iterator) {
-		map_state.occupied_tiles[tile] = {}
+	for cell in iter_cell(&cell_iterator) {
+		map_state.occupied_tiles[cell.location] = {}
 	}
 	sa.append(&map_state.display_map.placed_rooms, PlacedRoom{room =room^, origin = map_state.cursor_position})
 	increase_held_index(map_state)
@@ -86,25 +85,24 @@ place_room :: proc(map_state: ^MapScreenState) -> bool {
 }
 
 pickup_room :: proc(map_state: ^MapScreenState, room: ^MapRoom) {
-	tile_iterator := tile_make_iter(tiles = room.tiles, rotation = room.rotation)
-	for tile in iter_tiles(&tile_iterator) {
-		delete_key(&map_state.occupied_tiles, tile)
+	cell_iterator := cell_make_iter(cells = room.cells, rotation = room.rotation)
+	for cell in iter_cell(&cell_iterator) {
+		delete_key(&map_state.occupied_tiles, cell.location)
 	}
 	room.placed =  false
 }
 
 draw_map_room :: proc(map_state: MapScreenState, room: MapRoom) {
-	tile_iterator := tile_make_iter(tiles = room.tiles, origin = map_state.cursor_position, rotation = room.rotation)
-	collision := tiles_colliding(map_state, &tile_iterator)
+	cell_iterator := cell_make_iter(cells = room.cells, origin = map_state.cursor_position, rotation = room.rotation)
+	collision := tiles_colliding(map_state, &cell_iterator)
 
-	for tile in iter_tiles(&tile_iterator) {
-		position:= MAP_OFFSET + tile_to_vec(tile)
+	for cell in iter_cell(&cell_iterator) {
+		position:= MAP_OFFSET + tile_to_vec(cell.location)
 		rl.DrawRectangleV(position + SHADOW_OFFSET, TILE_SIZE, ROOM_SHADOW )
 	}
 
-	for tile in iter_tiles(&tile_iterator) {
-		exits := get_tile_exits(tile, tile_iterator.tiles)
-		position:= MAP_OFFSET + tile_to_vec(tile)
+	for cell in iter_cell(&cell_iterator) {
+		position:= MAP_OFFSET + tile_to_vec(cell.location)
 		rl.DrawRectangleV(position, TILE_SIZE, collision ? ROOM_COLOR_COLLIDING : ROOM_COLOR)
 
 	}

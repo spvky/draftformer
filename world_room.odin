@@ -6,21 +6,10 @@ import "core:os"
 import "core:strconv"
 import sa "core:container/small_array"
 
-RoomTag :: enum {
-	A,
-	B,
-	C
-}
-
-RoomCell :: struct {
-	location: Tile,
-	pixels: [12][12]u8
-}
-
-is_valid_room_cell :: proc(room_cell: RoomCell) -> bool {
+is_valid_room_cell :: proc(cell: Cell) -> bool {
 	for i in 0..<12 {
 		for j in 0..<12 {
-			value: = room_cell.pixels[i][j]
+			value: = cell.pixels[i][j]
 			if value != 0 && value != 2 {
 				return true
 			}
@@ -38,20 +27,20 @@ room_tag_as_filepath :: proc(tag: RoomTag) -> string {
 }
 
 // Read all records at once
-read_level :: proc(tag: RoomTag) -> sa.Small_Array(20, RoomCell) {
+read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
 	filename := room_tag_as_filepath(tag)
 	r: csv.Reader
 	r.trim_leading_space  = true
 	defer csv.reader_destroy(&r)
 
-	room_cell_array: sa.Small_Array(20, RoomCell)
+	cell_array: sa.Small_Array(20, Cell)
 
 	csv_data, ok := os.read_entire_file(filename)
 	if ok {
 		csv.reader_init_with_string(&r, string(csv_data))
 	} else {
 		fmt.printfln("Unable to open file: %v", filename)
-		return room_cell_array
+		return cell_array
 	}
 	defer delete(csv_data)
 
@@ -68,7 +57,7 @@ read_level :: proc(tag: RoomTag) -> sa.Small_Array(20, RoomCell) {
 	height:= len(records) / 12
 
 	
-	rooms: [10][10]RoomCell
+	rooms: [10][10]Cell
 
 	for r, i in records {
 		x: i16 = i16(i) / 12 //X and Y inform which room cell we are populating
@@ -90,9 +79,9 @@ read_level :: proc(tag: RoomTag) -> sa.Small_Array(20, RoomCell) {
 		for j in 0..<10 {
 			validity:= is_valid_room_cell(rooms[i][j])
 			if validity {
-				sa.append(&room_cell_array,rooms[i][j])
+				sa.append(&cell_array,rooms[i][j])
 			}
 		}
 	}
-	return room_cell_array
+	return cell_array
 }
