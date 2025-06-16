@@ -33,8 +33,13 @@ BakingRoom :: struct {
 	room_tag: RoomTag
 }
 
+room_tag_as_filepath :: proc(tag: RoomTag) -> string {
+	return fmt.tprintf("ldtk/samples/simplified/%v/Main.csv", tag)
+}
+
 // Read all records at once
-read_level :: proc(filename: string) -> sa.Small_Array(20, RoomCell) {
+read_level :: proc(tag: RoomTag) -> sa.Small_Array(20, RoomCell) {
+	filename := room_tag_as_filepath(tag)
 	r: csv.Reader
 	r.trim_leading_space  = true
 	defer csv.reader_destroy(&r)

@@ -28,7 +28,7 @@ main :: proc() {
 
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Draftformer")
 	defer rl.CloseWindow()
-	c_cells:= read_level("ldtk/samples/simplified/C/Main.csv")
+	c_cells:= read_level(.C)
 	fmt.printfln("C room length: %v",sa.len(c_cells))
 	map_state:= make_map_state()
 	defer delete_map_state(map_state)
