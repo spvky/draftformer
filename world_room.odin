@@ -60,15 +60,15 @@ read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
 	rooms: [10][10]Cell
 
 	for r, i in records {
-		x: i16 = i16(i) / 12 //X and Y inform which room cell we are populating
 		for f, j in r {
-			y: i16 = i16(j) / 12 //X and Y inform which room cell we are populating
-			ix:= i16(i) - (x * 12)
-			iy:= i16(j) - (y * 12)
+			x: i16 = i16(j) / 12 //X and Y inform which room cell we are populating
+			y: i16 = i16(i) / 12 //X and Y inform which room cell we are populating
+			ix:= i16(j) - (x * 12)
+			iy:= i16(i) - (y * 12)
 			current_cell := &rooms[x][y]
 			current_cell.location = Tile{x,y}
 			if field, ok := strconv.parse_uint(f); ok {
-				current_cell.pixels[ix][iy] = u8(field)
+				current_cell.pixels[iy][ix] = u8(field)
 			}
 			// fmt.printfln("Record %v, field %v: %q", i, j, f)
 		}
@@ -77,9 +77,9 @@ read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
 
 	for i in 0..<10 {
 		for j in 0..<10 {
-			validity:= is_valid_room_cell(rooms[i][j])
+			validity:= is_valid_room_cell(rooms[j][i])
 			if validity {
-				sa.append(&cell_array,rooms[i][j])
+				sa.append(&cell_array,rooms[j][i])
 			}
 		}
 	}
