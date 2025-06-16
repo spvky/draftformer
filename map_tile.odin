@@ -84,7 +84,8 @@ tile_to_vec :: proc(tile: Tile) -> Vec2 {
 }
 
 // cell_to_vec :: proc(cell: Cell) -> Vec2 {
-	
+// 	tile:= cell.location
+// 	tile_vec:= Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
 // }
 
 tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
