@@ -103,7 +103,9 @@ draw_map_room :: proc(map_state: MapScreenState, room: MapRoom) {
 	}
 
 	for tile in iter_tiles(&tile_iterator) {
+		exits := get_tile_exits(tile, tile_iterator.tiles)
 		position:= MAP_OFFSET + tile_to_vec(tile)
 		rl.DrawRectangleV(position, TILE_SIZE, collision ? ROOM_COLOR_COLLIDING : ROOM_COLOR)
+
 	}
 }

@@ -12,6 +12,8 @@ Tile :: [2]i16
 TileArray :: sa.Small_Array(100,Tile)
 TileSet :: map[Tile]struct{}
 
+TileData :: [12][12]u8
+
 // Struct for easily iterating tiles, while respecting rotation
 TileIter :: struct {
 	tiles: TileArray,
@@ -20,9 +22,37 @@ TileIter :: struct {
 	index: int,
 }
 
+TileExits :: struct {
+	north: bool,
+	south: bool,
+	east: bool,
+	west: bool
+}
+
 // Create a tile iter from a Small_Array(Tile)
 tile_make_iter :: proc(tiles: TileArray, origin: Tile = {0,0}, rotation: i8 = 0) -> TileIter {
 	return TileIter {tiles = tiles, origin = origin, rotation = rotation}
+}
+
+get_tile_exits :: proc(tile: Tile, tile_array: TileArray) -> TileExits {
+	length:= sa.len(tile_array)
+	exits: TileExits
+	for i in 0..<length {
+		tile_to_check := sa.get(tile_array,i)
+		if tile_to_check == (tile + Tile{1,0}) {
+			exits.west = true
+		}
+		if tile_to_check == (tile + Tile{-1,0}) {
+			exits.east = true
+		}
+		if tile_to_check == (tile + Tile{0,1}) {
+			exits.north = true
+		}
+		if tile_to_check == (tile + Tile{0,-1}) {
+			exits.south = true
+		}
+	}
+	return exits
 }
 
 // Iterate through a tile iter, notably does not consume the iter
