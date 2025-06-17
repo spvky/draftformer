@@ -206,6 +206,7 @@ draw_placed_rooms :: proc(map_state: MapScreenState) {
 			for cell in iter_cell(&cell_iter) {
 				position:= MAP_OFFSET + tile_to_vec(cell.location)
 				rl.DrawRectangleV(position, TILE_SIZE, ROOM_COLOR)
+				draw_cell_contents(cell)
 			}
 		}
 	}

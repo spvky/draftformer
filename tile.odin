@@ -70,7 +70,10 @@ draw_cell_contents :: proc(cell: Cell) {
 		for j in 0..<12 {
 			pixel:= cell.pixels[i][j]
 			pixel_position:= tile_vec + Vec2{f32(j)*4,f32(i)*4} + MAP_OFFSET
-			if pixel == 3 {
+			switch pixel {
+			case 1:
+				rl.DrawRectangleV(pixel_position,{4,4}, {255,255,255,125})
+			case 3: 
 				rl.DrawRectangleV(pixel_position,{4,4}, rl.YELLOW)
 			}
 		}
