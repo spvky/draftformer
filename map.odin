@@ -5,7 +5,6 @@ import rl "vendor:raylib"
 import sa "core:container/small_array"
 import l "core:math/linalg"
 
-MAP_OFFSET :Vec2 : {400,200}
 
 AreaTag :: enum {
 	Basic,

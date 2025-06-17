@@ -5,29 +5,9 @@ import rl "vendor:raylib"
 import sa "core:container/small_array"
 import l "core:math/linalg"
 
-TILE_SIZE :: [2]f32 {48,48}
-SHADOW_OFFSET :: [2]f32{-10,10}
 
 Tile :: [2]i16
-TileArray :: sa.Small_Array(100,Tile)
 TileSet :: map[Tile]struct{}
-
-TileData :: [12][12]u8
-
-// Struct for easily iterating tiles, while respecting rotation
-TileIter :: struct {
-	tiles: TileArray,
-	rotation: i8,
-	origin: Tile,
-	index: int,
-}
-
-TileExits :: struct {
-	north: bool,
-	south: bool,
-	east: bool,
-	west: bool
-}
 
 CellIter :: struct {
 	cells: CellArray,

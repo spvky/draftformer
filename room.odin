@@ -5,9 +5,6 @@ import rl "vendor:raylib"
 import sa "core:container/small_array"
 import l "core:math/linalg"
 
-ROOM_COLOR :rl.Color: {0,86,214,255}
-ROOM_COLOR_COLLIDING: rl.Color: {128,4,4,255}
-ROOM_SHADOW :rl.Color:{0,0, 0, 100}
 
 RoomArray :: sa.Small_Array(20, MapRoom)
 
