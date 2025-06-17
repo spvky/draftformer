@@ -83,10 +83,18 @@ tile_to_vec :: proc(tile: Tile) -> Vec2 {
 	return Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
 }
 
-cell_to_vec :: proc(cell: Cell) -> Vec2 {
+draw_cell_contents :: proc(cell: Cell) {
 	tile:= cell.location
 	tile_vec:= Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
-
+	for i in 0..<12 {
+		for j in 0..<12 {
+			pixel:= cell.pixels[i][j]
+			pixel_position:= tile_vec + Vec2{f32(j)*4,f32(i)*4} + MAP_OFFSET
+			if pixel == 3 {
+				rl.DrawRectangleV(pixel_position,{4,4}, rl.YELLOW)
+			}
+		}
+	}
 }
 
 tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {

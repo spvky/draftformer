@@ -45,7 +45,7 @@ read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
 	defer delete(csv_data)
 
 	records, err := csv.read_all(&r)
-	if err != nil do fmt.printfln("Failed to parse CSV file for %v", filename)
+	if err != nil do fmt.printfln("Failed to parse CSV file for %v\nErr: %v", filename, err)
 
 	defer {
 		for rec in records {
