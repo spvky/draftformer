@@ -101,13 +101,9 @@ draw_map :: proc(map_state: MapScreenState) {
 make_map_state :: proc() -> MapScreenState {
 	starting_pos:= tile_to_screen_pos(Tile{0,0})
 	occupied_tiles:= make(map[Tile]bool, 100)
-	room_cells:= read_room(.C)
-	room := MapRoom {
-		cells = room_cells
-	}
 
 	rooms: RoomArray
-	sa.append_elems(&rooms, room)
+	sa.append_elems(&rooms,read_room(.A), read_room(.B), read_room(.C), read_room(.D), read_room(.E))
 	return MapScreenState {
 		cursor_displayed_vec_pos = starting_pos,
 		cursor_vec_pos = starting_pos,
@@ -150,8 +146,8 @@ select_room :: proc(map_state: ^MapScreenState) {
 
 // Handles the cursor lerping to it's desired location
 handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
-	if l.distance(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos) > 2.0 {
-		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 20)
+	if l.distance(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos) > 1.0 {
+		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 5)
 	} else {
 		map_state.cursor_displayed_vec_pos = map_state.cursor_vec_pos
 	}

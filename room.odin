@@ -20,7 +20,9 @@ MapRoom :: struct {
 RoomTag :: enum {
 	A,
 	B,
-	C
+	C,
+	D,
+	E
 }
 
 Cell :: struct {
@@ -28,8 +30,6 @@ Cell :: struct {
 	pixels: [12][12]u8
 }
 CellArray :: sa.Small_Array(20,Cell)
-
-
 
 rotate_room :: proc(map_state: ^MapScreenState) {
 	if room, ok := sa.get_ptr_safe(&map_state.rooms, map_state.held_room_index); ok {
@@ -100,7 +100,9 @@ draw_map_room :: proc(map_state: MapScreenState, room: MapRoom) {
 
 	for cell in iter_cell(&cell_iterator) {
 		position:= MAP_OFFSET + tile_to_vec(cell.location)
-		rl.DrawRectangleV(position, TILE_SIZE, collision ? ROOM_COLOR_COLLIDING : ROOM_COLOR)
+		color := collision ? ROOM_COLOR_COLLIDING : ROOM_COLOR
+		color.a = PLACEMENT_OPACITY
+		rl.DrawRectangleV(position, TILE_SIZE, color)
 		draw_cell_contents(cell)
 
 	}

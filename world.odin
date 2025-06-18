@@ -27,7 +27,7 @@ room_tag_as_filepath :: proc(tag: RoomTag) -> string {
 }
 
 // Read all records at once
-read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
+read_room :: proc(tag: RoomTag) -> MapRoom {
 	filename := room_tag_as_filepath(tag)
 	r: csv.Reader
 	r.trim_leading_space  = true
@@ -40,7 +40,7 @@ read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
 		csv.reader_init_with_string(&r, string(csv_data))
 	} else {
 		fmt.printfln("Unable to open file: %v", filename)
-		return cell_array
+		return MapRoom{}
 	}
 	defer delete(csv_data)
 
@@ -83,5 +83,5 @@ read_room :: proc(tag: RoomTag) -> sa.Small_Array(20, Cell) {
 			}
 		}
 	}
-	return cell_array
+	return  MapRoom {cells=cell_array}
 }
