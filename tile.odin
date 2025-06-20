@@ -7,7 +7,6 @@ import l "core:math/linalg"
 
 
 Tile :: [2]i16
-TileSet :: map[Tile]struct{}
 
 CellIter :: struct {
 	cells: CellArray,

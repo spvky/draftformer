@@ -31,18 +31,19 @@ main :: proc() {
 	cursor:= rl.LoadTexture("./sprites/cursor.png")
 	defer rl.CloseWindow()
 	map_state:= make_map_state()
-	defer delete_map_state(map_state)
+	world := make_world()
+	defer delete_world(world)
 
 	main_block: for !rl.WindowShouldClose() {
 
 		frametime:= rl.GetFrameTime()
 
-		map_controls(&map_state, frametime)
+		map_controls(&world,&map_state, frametime)
 
 		// Drawing
 		rl.BeginDrawing()
 		rl.ClearBackground({255,211,172,255})
-		draw_map(map_state, &cursor)
+		draw_map(&world, &map_state, &cursor)
 		rl.EndDrawing()
 		free_all(context.temp_allocator)
 	}

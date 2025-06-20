@@ -8,10 +8,43 @@ import sa "core:container/small_array"
 
 
 World :: struct {
-	placed_rooms: RoomArray,
-	held_rooms: RoomArray,
+	rooms: sa.Small_Array(40, MapRoom),
+	placed_rooms: sa.Small_Array(40,PlacedRoomEntry),
+	held_rooms: sa.Small_Array(40,^MapRoom),
+	occupied_tiles: map[Tile]struct{},
 }
 
+PlacedRoomEntry :: struct {
+	room_ptr: ^MapRoom,
+	origin: Tile
+}
+
+make_world :: proc() -> World {
+	rooms: sa.Small_Array(40, MapRoom)
+	held_rooms: sa.Small_Array(40,^MapRoom)
+	sa.append_elems(&rooms,read_room(.A), read_room(.B), read_room(.C), read_room(.D), read_room(.E))
+	for i in 0..<sa.len(rooms) {
+		ptr := sa.get_ptr(&rooms, i)
+		sa.append_elem(&held_rooms, ptr)
+	}
+
+	return World {
+		rooms = rooms,
+		held_rooms = held_rooms
+	}
+}
+
+delete_world :: proc(world: World) {
+	delete(world.occupied_tiles)
+}
+
+get_held_room_ptr :: proc(world: ^World, state: ^MapScreenState) -> (ptr: ^MapRoom, ok: bool) {
+	if ptr, ok = sa.get_safe(world.held_rooms, state.held_room_index); ok {
+		fmt.println("Found pointer to held room")
+		return
+	}
+	return
+}
 
 is_valid_room_cell :: proc(cell: Cell) -> bool {
 	for i in 0..<12 {
@@ -77,7 +110,6 @@ read_room :: proc(tag: RoomTag) -> MapRoom {
 			if field, ok := strconv.parse_uint(f); ok {
 				current_cell.pixels[iy][ix] = u8(field)
 			}
-			// fmt.printfln("Record %v, field %v: %q", i, j, f)
 		}
 	}
 	fmt.printfln("Width: %v, Height: %v", width, height)
