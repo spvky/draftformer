@@ -40,7 +40,6 @@ delete_world :: proc(world: World) {
 
 get_held_room_ptr :: proc(world: ^World, state: ^MapScreenState) -> (ptr: ^MapRoom, ok: bool) {
 	if ptr, ok = sa.get_safe(world.held_rooms, state.held_room_index); ok {
-		fmt.println("Found pointer to held room")
 		return
 	}
 	return

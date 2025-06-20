@@ -128,8 +128,11 @@ map_controls :: proc(world: ^World, map_state: ^MapScreenState, frametime: f32) 
 	}
 
 	if rl.IsKeyPressed(.ENTER) {
-		can_place_room := place_room(world,map_state)
-		if !can_place_room do fmt.println("Cannot place room")
+		switch map_state.mode {
+			case .Placement:
+				place_room(world,map_state)
+			case .Selection:
+		}
 	}
 	select_room(world, map_state)
 	rotate_room(world,map_state)
