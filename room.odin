@@ -6,7 +6,7 @@ import sa "core:container/small_array"
 import l "core:math/linalg"
 
 
-RoomArray :: sa.Small_Array(20, MapRoom)
+RoomArray :: sa.Small_Array(40, MapRoom)
 
 MapRoom :: struct {
 	area: AreaTag,

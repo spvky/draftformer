@@ -9,6 +9,7 @@ Vec2 :: [2]f32
 
 SCREEN_WIDTH :: 1600
 SCREEN_HEIGHT :: 900
+game_state := GameState{mode = .Map}
 
 main :: proc() {
 	when ODIN_DEBUG {
@@ -27,6 +28,7 @@ main :: proc() {
 	}
 
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Draftformer")
+	cursor:= rl.LoadTexture("./sprites/cursor.png")
 	defer rl.CloseWindow()
 	map_state:= make_map_state()
 	defer delete_map_state(map_state)
@@ -40,8 +42,9 @@ main :: proc() {
 		// Drawing
 		rl.BeginDrawing()
 		rl.ClearBackground({255,211,172,255})
-		draw_map(map_state)
+		draw_map(map_state, &cursor)
 		rl.EndDrawing()
+		free_all(context.temp_allocator)
 	}
 }
 

@@ -6,6 +6,13 @@ import "core:os"
 import "core:strconv"
 import sa "core:container/small_array"
 
+
+World :: struct {
+	placed_rooms: RoomArray,
+	held_rooms: RoomArray,
+}
+
+
 is_valid_room_cell :: proc(cell: Cell) -> bool {
 	for i in 0..<12 {
 		for j in 0..<12 {

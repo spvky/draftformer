@@ -19,13 +19,15 @@ MapRegion :: struct {
 }
 
 MapScreenState :: struct {
+	mode: enum{Placement, Selection},
 	cursor_position: Tile,
 	cursor_displayed_vec_pos: Vec2,
 	cursor_vec_pos: Vec2,
 	rooms: RoomArray,
 	display_map: DisplayMap,
 	held_room_index: int,
-	occupied_tiles: TileSet
+	occupied_tiles: TileSet,
+	dirty: bool,
 }
 
 DisplayMap :: struct {
@@ -61,15 +63,16 @@ increase_held_index :: proc(state: ^MapScreenState) {
 	
 	for iter_count < length {
 		if room, ok := sa.get_safe(state.rooms, new_index); ok && !room.placed {
-			fmt.printfln("New index of %v set", new_index)
 			state.held_room_index = new_index
 			return
 		}
 		iter_count += 1
 		new_index += 1
+		if iter_count == length {
+			state.mode = .Selection
+		}
 		if new_index >= length do new_index = 0
 	}
-	fmt.println("No valid index found")
 	return
 }
 decrease_held_index :: proc(state: ^MapScreenState) {
@@ -80,7 +83,6 @@ decrease_held_index :: proc(state: ^MapScreenState) {
 	
 	for iter_count < length {
 		if room, ok := sa.get_safe(state.rooms, new_index); ok && !room.placed {
-			fmt.printfln("New index of %v set", new_index)
 			state.held_room_index = new_index
 			return
 		}
@@ -88,14 +90,13 @@ decrease_held_index :: proc(state: ^MapScreenState) {
 		new_index -= 1
 		if new_index < 0 do new_index = length - 1
 	}
-	fmt.println("No valid index found")
 	return
 }
 
-draw_map :: proc(map_state: MapScreenState) {
+draw_map :: proc(map_state: MapScreenState, cursor_sprite: ^rl.Texture2D) {
 	draw_map_grid()
 	draw_placed_rooms(map_state)
-	draw_cursor(map_state)
+	draw_cursor(map_state,cursor_sprite)
 }
 
 make_map_state :: proc() -> MapScreenState {
@@ -147,7 +148,7 @@ select_room :: proc(map_state: ^MapScreenState) {
 // Handles the cursor lerping to it's desired location
 handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 	if l.distance(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos) > 1.0 {
-		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 5)
+		map_state.cursor_displayed_vec_pos = l.lerp(map_state.cursor_displayed_vec_pos, map_state.cursor_vec_pos, frametime * 20)
 	} else {
 		map_state.cursor_displayed_vec_pos = map_state.cursor_vec_pos
 	}
@@ -186,12 +187,17 @@ map_controls :: proc(map_state: ^MapScreenState, frametime: f32) {
 }
 
 
-draw_cursor :: proc(map_state: MapScreenState) {
-	if room, ok := sa.get_safe(map_state.rooms,map_state.held_room_index); ok {
-		draw_map_room(map_state, room)
-	} else {
-	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos, TILE_SIZE, {0,0,0,100})
-	rl.DrawRectangleV(map_state.cursor_displayed_vec_pos + SHADOW_OFFSET, TILE_SIZE, {0,86,214,255})
+draw_cursor :: proc(state: MapScreenState, cursor_sprite: ^rl.Texture2D) {
+	switch state.mode {
+		case .Placement:
+			if room, ok := sa.get_safe(state.rooms,state.held_room_index); ok {
+				draw_map_room(state, room)
+			} else {
+			rl.DrawRectangleV(state.cursor_displayed_vec_pos, TILE_SIZE, {0,0,0,100})
+			rl.DrawRectangleV(state.cursor_displayed_vec_pos + SHADOW_OFFSET, TILE_SIZE, {0,86,214,255})
+			}
+		case .Selection:
+			rl.DrawTextureV(cursor_sprite^, state.cursor_displayed_vec_pos, rl.WHITE)
 	}
 }
 
