@@ -27,9 +27,18 @@ main :: proc() {
 		}
 	}
 
+	// Create Window
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Draftformer")
-	cursor:= rl.LoadTexture("./sprites/cursor.png")
 	defer rl.CloseWindow()
+
+	// Load Textures
+	cursor:= rl.LoadTexture("./sprites/cursor.png")
+
+	// Build our cameras
+	gameplay_camera: rl.Camera2D
+	map_screen:= rl.LoadRenderTexture(SCREEN_WIDTH * 0.75, SCREEN_HEIGHT)
+
+	// Create the game state
 	map_state:= make_map_state()
 	world := make_world()
 	defer delete_world(world)
@@ -38,14 +47,39 @@ main :: proc() {
 
 		frametime:= rl.GetFrameTime()
 
-		map_controls(&world,&map_state, frametime)
+		toggle_map(&map_state)
+		if map_state.show_map {
+			map_controls(&world,&map_state, frametime)
+		}
 
-		// Drawing
+		// Map Screen pass
+		rl.BeginTextureMode(map_screen)
+		map_screen_pass: {
+			rl.ClearBackground({255,211,172,255})
+			draw_map(&world, &map_state, &cursor)
+		}
+		rl.EndTextureMode()
+
+		// Drawing to the actual screen
 		rl.BeginDrawing()
-		rl.ClearBackground({255,211,172,255})
-		draw_map(&world, &map_state, &cursor)
+
+		rl.BeginMode2D(gameplay_camera)
+		rl.ClearBackground(rl.BLACK)
+		rl.EndMode2D()
+
+		if map_state.show_map {
+		rl.DrawTexturePro(
+			map_screen.texture,
+			rl.Rectangle{x = 250, y = 50, width = 780, height = -780},
+			rl.Rectangle{x = 550, y = 200, width = 500, height = 500},
+			{0,0},
+			0,
+			rl.WHITE
+		)
+		}
 		rl.EndDrawing()
 		free_all(context.temp_allocator)
 	}
+	rl.UnloadRenderTexture(map_screen)
 }
 

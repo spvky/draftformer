@@ -58,8 +58,13 @@ iter_cell :: proc(it: ^CellIter) -> (val: Cell, cond: bool) {
 	return
 }
 
-tile_to_vec :: proc(tile: Tile) -> Vec2 {
+map_tile_to_vec :: proc(tile: Tile) -> Vec2 {
 	return Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
+}
+
+map_tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
+	map_start:= Vec2{400,200}
+	return map_start + map_tile_to_vec(tile)
 }
 
 draw_cell_contents :: proc(cell: Cell) {
@@ -79,10 +84,6 @@ draw_cell_contents :: proc(cell: Cell) {
 	}
 }
 
-tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
-	map_start:= Vec2{400,200}
-	return map_start + tile_to_vec(tile)
-}
 
 
 rotate_pixels90 :: proc(pixels: ^[12][12]u8) {

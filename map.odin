@@ -6,6 +6,7 @@ import sa "core:container/small_array"
 import l "core:math/linalg"
 
 MapScreenState :: struct {
+	show_map: bool,
 	mode: enum{Placement, Selection},
 	cursor_position: Tile,
 	cursor_displayed_vec_pos: Vec2,
@@ -56,7 +57,7 @@ draw_map :: proc(world: ^World, map_state: ^MapScreenState, cursor_sprite: ^rl.T
 }
 
 make_map_state :: proc() -> MapScreenState {
-	starting_pos:= tile_to_screen_pos(Tile{0,0})
+	starting_pos:= map_tile_to_screen_pos(Tile{0,0})
 	occupied_tiles:= make(map[Tile]bool, 100)
 
 	return MapScreenState {
@@ -86,7 +87,7 @@ move_cursor :: proc(using map_state: ^MapScreenState, delta: Tile) {
 	}
 
 
-	map_state.cursor_vec_pos = tile_to_screen_pos(map_state.cursor_position)
+	map_state.cursor_vec_pos = map_tile_to_screen_pos(map_state.cursor_position)
 }
 
 // Cycle through available rooms
@@ -104,6 +105,11 @@ handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 	}
 }
 
+toggle_map :: proc(map_state: ^MapScreenState) {
+	if rl.IsKeyPressed(.M) {
+		map_state.show_map = !map_state.show_map
+	}
+}
 map_controls :: proc(world: ^World, map_state: ^MapScreenState, frametime: f32) {
 	cursor_movement: Tile
 	x,y: f32
@@ -156,7 +162,7 @@ draw_placed_rooms :: proc(world: ^World) {
 		placed_room := sa.get(world.placed_rooms, i)
 		cell_iter := cell_make_iter(cells = placed_room.room_ptr.cells, origin = placed_room.origin, rotation = placed_room.room_ptr.rotation)
 		for cell in iter_cell(&cell_iter) {
-			position:= MAP_OFFSET + tile_to_vec(cell.location)
+			position:= MAP_OFFSET + map_tile_to_vec(cell.location)
 			rl.DrawRectangleV(position, TILE_SIZE, ROOM_COLOR)
 			draw_cell_contents(cell)
 		}

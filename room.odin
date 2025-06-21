@@ -33,12 +33,12 @@ draw_map_room :: proc(world: ^World, map_state: ^MapScreenState, room: ^MapRoom)
 	collision := tiles_colliding(world, &cell_iterator)
 
 	for cell in iter_cell(&cell_iterator) {
-		position:= MAP_OFFSET + tile_to_vec(cell.location)
+		position:= MAP_OFFSET + map_tile_to_vec(cell.location)
 		rl.DrawRectangleV(position + SHADOW_OFFSET, TILE_SIZE, ROOM_SHADOW )
 	}
 
 	for cell in iter_cell(&cell_iterator) {
-		position:= MAP_OFFSET + tile_to_vec(cell.location)
+		position:= MAP_OFFSET + map_tile_to_vec(cell.location)
 		color := collision ? ROOM_COLOR_COLLIDING : ROOM_COLOR
 		color.a = PLACEMENT_OPACITY
 		rl.DrawRectangleV(position, TILE_SIZE, color)
