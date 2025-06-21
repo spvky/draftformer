@@ -5,24 +5,28 @@ import "core:encoding/csv"
 import "core:os"
 import "core:strconv"
 import sa "core:container/small_array"
+import rl "vendor:raylib"
 
 
 World :: struct {
 	rooms: sa.Small_Array(40, MapRoom),
-	placed_rooms: sa.Small_Array(40,PlacedRoomEntry),
+	placed_map_rooms: sa.Small_Array(40,PlacedRoomEntry),
 	held_rooms: sa.Small_Array(40,^MapRoom),
 	occupied_tiles: map[Tile]struct{},
+	placed_world_rooms: sa.Small_Array(40, WorldRoom),
 }
+
 
 PlacedRoomEntry :: struct {
 	room_ptr: ^MapRoom,
-	origin: Tile
+	origin: Tile,
 }
 
 make_world :: proc() -> World {
 	rooms: sa.Small_Array(40, MapRoom)
 	held_rooms: sa.Small_Array(40,^MapRoom)
 	sa.append_elems(&rooms,read_room(.A), read_room(.B), read_room(.C), read_room(.D), read_room(.E))
+
 	for i in 0..<sa.len(rooms) {
 		ptr := sa.get_ptr(&rooms, i)
 		sa.append_elem(&held_rooms, ptr)
@@ -30,7 +34,8 @@ make_world :: proc() -> World {
 
 	return World {
 		rooms = rooms,
-		held_rooms = held_rooms
+		held_rooms = held_rooms,
+
 	}
 }
 
@@ -61,13 +66,19 @@ BakingRoom :: struct {
 	room_tag: RoomTag
 }
 
-room_tag_as_filepath :: proc(tag: RoomTag) -> string {
-	return fmt.tprintf("ldtk/samples/simplified/%v/Main.csv", tag)
+room_tag_as_filepath :: proc(tag: RoomTag, extension: enum{CSV, PNG}) -> string {
+	switch extension {
+		case .CSV:
+			return fmt.tprintf("ldtk/samples/simplified/%v/Main.csv", tag)
+		case .PNG:
+			return fmt.tprintf("ldtk/samples/simplified/%v/Main.png", tag)
+	}
+	return ""
 }
 
 // Read all records at once
 read_room :: proc(tag: RoomTag) -> MapRoom {
-	filename := room_tag_as_filepath(tag)
+	filename := room_tag_as_filepath(tag, .CSV)
 	r: csv.Reader
 	r.trim_leading_space  = true
 	defer csv.reader_destroy(&r)
@@ -121,5 +132,5 @@ read_room :: proc(tag: RoomTag) -> MapRoom {
 			}
 		}
 	}
-	return  MapRoom {cells=cell_array}
+	return  MapRoom {cells=cell_array, name = tag}
 }

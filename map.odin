@@ -28,13 +28,13 @@ increase_held_index :: proc(world: ^World, state: ^MapScreenState) {
 		}
 		iter_count += 1
 		new_index += 1
-		if new_index > length do new_index = 0
+		if new_index >= length do new_index = 0
 	}
 	return
 }
 
 decrease_held_index :: proc(world: ^World, state: ^MapScreenState) {
-	length:= sa.len(world.placed_rooms)
+	length:= sa.len(world.placed_map_rooms)
 	new_index:= state.held_room_index - 1
 	iter_count:= 1
 	if new_index < 0 do new_index = length - 1
@@ -52,7 +52,7 @@ decrease_held_index :: proc(world: ^World, state: ^MapScreenState) {
 
 draw_map :: proc(world: ^World, map_state: ^MapScreenState, cursor_sprite: ^rl.Texture2D) {
 	draw_map_grid()
-	draw_placed_rooms(world)
+	draw_placed_map_rooms(world)
 	draw_cursor(world,map_state,cursor_sprite)
 }
 
@@ -105,8 +105,11 @@ handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 	}
 }
 
-toggle_map :: proc(map_state: ^MapScreenState) {
+toggle_map :: proc(world: ^World, map_state: ^MapScreenState) {
 	if rl.IsKeyPressed(.M) {
+		if map_state.show_map {
+			bake_rooms(world, map_state)
+		}
 		map_state.show_map = !map_state.show_map
 	}
 }
@@ -157,13 +160,13 @@ draw_cursor :: proc(world: ^World, state: ^MapScreenState, cursor_sprite: ^rl.Te
 	}
 }
 
-draw_placed_rooms :: proc(world: ^World) {
-	for i in 0..<sa.len(world.placed_rooms) {
-		placed_room := sa.get(world.placed_rooms, i)
+draw_placed_map_rooms :: proc(world: ^World) {
+	for i in 0..<sa.len(world.placed_map_rooms) {
+		placed_room := sa.get(world.placed_map_rooms, i)
 		cell_iter := cell_make_iter(cells = placed_room.room_ptr.cells, origin = placed_room.origin, rotation = placed_room.room_ptr.rotation)
 		for cell in iter_cell(&cell_iter) {
 			position:= MAP_OFFSET + map_tile_to_vec(cell.location)
-			rl.DrawRectangleV(position, TILE_SIZE, ROOM_COLOR)
+			rl.DrawRectangleV(position, MAP_TILE_SIZE, ROOM_COLOR)
 			draw_cell_contents(cell)
 		}
 	}
@@ -171,7 +174,7 @@ draw_placed_rooms :: proc(world: ^World) {
 
 
 draw_map_grid :: proc() {
-	rl.DrawRectangleV(MAP_OFFSET, {TILE_SIZE.x * 10,TILE_SIZE.y * 10}, {128,128,128,100})
+	rl.DrawRectangleV(MAP_OFFSET, {MAP_TILE_SIZE.x * 10,MAP_TILE_SIZE.y * 10}, {128,128,128,100})
 }
 
 

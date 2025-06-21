@@ -14,6 +14,12 @@ MapRoom :: struct {
 	unlocked: bool,
 }
 
+WorldRoom :: struct {
+	tag: RoomTag,
+	position: Vec2,
+	rotation: f32
+}
+
 RoomTag :: enum {
 	A,
 	B,
@@ -34,15 +40,23 @@ draw_map_room :: proc(world: ^World, map_state: ^MapScreenState, room: ^MapRoom)
 
 	for cell in iter_cell(&cell_iterator) {
 		position:= MAP_OFFSET + map_tile_to_vec(cell.location)
-		rl.DrawRectangleV(position + SHADOW_OFFSET, TILE_SIZE, ROOM_SHADOW )
+		rl.DrawRectangleV(position + SHADOW_OFFSET, MAP_TILE_SIZE, ROOM_SHADOW )
 	}
 
 	for cell in iter_cell(&cell_iterator) {
 		position:= MAP_OFFSET + map_tile_to_vec(cell.location)
 		color := collision ? ROOM_COLOR_COLLIDING : ROOM_COLOR
 		color.a = PLACEMENT_OPACITY
-		rl.DrawRectangleV(position, TILE_SIZE, color)
+		rl.DrawRectangleV(position, MAP_TILE_SIZE, color)
 		draw_cell_contents(cell)
+	}
+}
 
+draw_world_rooms :: proc(world: ^World, atlas: ^TextureAtlas) {
+	length := sa.len(world.placed_world_rooms)
+	for i in 0..<length {
+		room := sa.get(world.placed_world_rooms, i)
+		tex := atlas.room_textures[room.tag]
+		rl.DrawTextureEx(tex,room.position, room.rotation, 1, rl.WHITE)
 	}
 }

@@ -53,7 +53,7 @@ place_room :: proc(world: ^World, map_state: ^MapScreenState) -> bool {
 	for cell in iter_cell(&cell_iterator) {
 		world.occupied_tiles[cell.location] = {}
 	}
-	sa.append(&world.placed_rooms, PlacedRoomEntry{room_ptr=room_ptr, origin = map_state.cursor_position})
+	sa.append(&world.placed_map_rooms, PlacedRoomEntry{room_ptr=room_ptr, origin = map_state.cursor_position})
 	sa.unordered_remove(&world.held_rooms, map_state.held_room_index)
 	if sa.len(world.held_rooms) == 0 {
 		map_state.mode = .Selection
@@ -61,5 +61,6 @@ place_room :: proc(world: ^World, map_state: ^MapScreenState) -> bool {
 		increase_held_index(world,map_state)
 	}
 
+	map_state.dirty = true
 	return true
 }

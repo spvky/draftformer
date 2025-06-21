@@ -41,13 +41,14 @@ main :: proc() {
 	// Create the game state
 	map_state:= make_map_state()
 	world := make_world()
+	atlas := make_texture_atlas()
 	defer delete_world(world)
 
 	main_block: for !rl.WindowShouldClose() {
 
 		frametime:= rl.GetFrameTime()
 
-		toggle_map(&map_state)
+		toggle_map(&world, &map_state)
 		if map_state.show_map {
 			map_controls(&world,&map_state, frametime)
 		}
@@ -66,6 +67,8 @@ main :: proc() {
 		rl.BeginMode2D(gameplay_camera)
 		rl.ClearBackground(rl.BLACK)
 		rl.EndMode2D()
+
+		draw_world_rooms(&world, &atlas)
 
 		if map_state.show_map {
 		rl.DrawTexturePro(

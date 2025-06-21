@@ -59,7 +59,7 @@ iter_cell :: proc(it: ^CellIter) -> (val: Cell, cond: bool) {
 }
 
 map_tile_to_vec :: proc(tile: Tile) -> Vec2 {
-	return Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
+	return Vec2{f32(tile.x)  * MAP_TILE_SIZE.x, f32(tile.y) * MAP_TILE_SIZE.y}
 }
 
 map_tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
@@ -69,7 +69,7 @@ map_tile_to_screen_pos :: proc(tile: Tile) -> Vec2 {
 
 draw_cell_contents :: proc(cell: Cell) {
 	tile:= cell.location
-	tile_vec:= Vec2{f32(tile.x)  * TILE_SIZE.x, f32(tile.y) * TILE_SIZE.y}
+	tile_vec:= Vec2{f32(tile.x)  * MAP_TILE_SIZE.x, f32(tile.y) * MAP_TILE_SIZE.y}
 	for i in 0..<12 {
 		for j in 0..<12 {
 			pixel:= cell.pixels[i][j]
