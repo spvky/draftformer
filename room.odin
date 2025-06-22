@@ -56,7 +56,11 @@ draw_world_rooms :: proc(world: ^World, atlas: ^TextureAtlas) {
 	length := sa.len(world.placed_world_rooms)
 	for i in 0..<length {
 		room := sa.get(world.placed_world_rooms, i)
+		pos:= room.position
 		tex := atlas.room_textures[room.tag]
-		rl.DrawTextureEx(tex,room.position, room.rotation, 1, rl.WHITE)
+		if room.rotation == 90 do pos += {96,0}
+		if room.rotation == 180 do pos += {96,96}
+		if room.rotation == 270 do pos += {0,96}
+		rl.DrawTextureEx(tex,pos, room.rotation, 1, rl.WHITE)
 	}
 }
