@@ -58,9 +58,12 @@ draw_world_rooms :: proc(world: ^World, atlas: ^TextureAtlas) {
 		room := sa.get(world.placed_world_rooms, i)
 		pos:= room.position
 		tex := atlas.room_textures[room.tag]
-		if room.rotation == 90 do pos += {96,0}
-		if room.rotation == 180 do pos += {96,96}
-		if room.rotation == 270 do pos += {0,96}
-		rl.DrawTextureEx(tex,pos, room.rotation, 1, rl.WHITE)
+		rl.DrawTexturePro(
+			tex,
+			{x = 0, y = 0, width = f32(tex.width), height = f32(tex.height)},
+			{x = pos.x, y = pos.y, width = f32(tex.width), height = f32(tex.height)},
+			{48,48}, 
+			room.rotation, 
+			rl.WHITE)
 	}
 }
