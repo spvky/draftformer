@@ -14,6 +14,8 @@ World :: struct {
 	held_rooms: sa.Small_Array(40,^MapRoom),
 	occupied_tiles: map[Tile]struct{},
 	placed_world_rooms: sa.Small_Array(40, WorldRoom),
+	camera: rl.Camera2D,
+	player: Player,
 }
 
 
@@ -32,10 +34,15 @@ make_world :: proc() -> World {
 		sa.append_elem(&held_rooms, ptr)
 	}
 
+	camera := rl.Camera2D {
+		target = {0,0},
+		zoom = 10
+	}
+
 	return World {
 		rooms = rooms,
 		held_rooms = held_rooms,
-
+		camera = camera
 	}
 }
 

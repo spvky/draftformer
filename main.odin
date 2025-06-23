@@ -31,12 +31,8 @@ main :: proc() {
 	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Draftformer")
 	defer rl.CloseWindow()
 
-	// Load Textures
-	cursor:= rl.LoadTexture("./sprites/cursor.png")
-
-	// Build our cameras
-	gameplay_camera: rl.Camera2D
-	map_screen:= rl.LoadRenderTexture(SCREEN_WIDTH * 0.75, SCREEN_HEIGHT)
+	gameplay_screen := rl.LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT)
+	map_screen := rl.LoadRenderTexture(SCREEN_WIDTH * 0.75, SCREEN_HEIGHT)
 
 	// Create the game state
 	map_state:= make_map_state()
@@ -49,27 +45,42 @@ main :: proc() {
 		frametime:= rl.GetFrameTime()
 
 		toggle_map(&world, &map_state)
+		player_update(&world, frametime)
 		if map_state.show_map {
 			map_controls(&world,&map_state, frametime)
 		}
 
 		// Map Screen pass
-		rl.BeginTextureMode(map_screen)
 		map_screen_pass: {
+			rl.BeginTextureMode(map_screen)
 			rl.ClearBackground({255,211,172,255})
-			draw_map(&world, &map_state, &cursor)
+			draw_map(&world, &map_state, &atlas)
+			rl.EndTextureMode()
 		}
-		rl.EndTextureMode()
 
-		// Drawing to the actual screen
+		gameplay_screen_pass: {
+			rl.BeginTextureMode(gameplay_screen)
+			rl.ClearBackground(rl.BLUE)
+			rl.BeginMode2D(world.camera)
+			draw_world_rooms(&world, &atlas)
+			draw_player(&world, &atlas)
+			rl.EndMode2D()
+			rl.EndTextureMode()
+		}
+
 		rl.BeginDrawing()
 
-		rl.BeginMode2D(gameplay_camera)
-		rl.ClearBackground(rl.BLACK)
-		rl.EndMode2D()
+		rl.DrawTexturePro(
+			gameplay_screen.texture,
+			rl.Rectangle{width = 1600, height = -900},
+			rl.Rectangle{width = 1600, height = 900},
+			{0,0},
+			0,
+			rl.WHITE
+		)
 
-		draw_world_rooms(&world, &atlas)
 
+		// If we should show the map, draw it's render texture to the screen
 		if map_state.show_map {
 		rl.DrawTexturePro(
 			map_screen.texture,

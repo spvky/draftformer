@@ -5,13 +5,23 @@ import "core:strings"
 import rl "vendor:raylib"
 
 TextureAtlas :: struct {
-	room_textures: [RoomTag]rl.Texture2D
+	room_textures: [RoomTag]rl.Texture2D,
+	cursor: rl.Texture2D,
+	guy: rl.Texture2D,
 }
 
 make_texture_atlas :: proc() -> TextureAtlas {
 	atlas: TextureAtlas
 	load_room_textures(&atlas)
+	load_misc_sprites(&atlas)
 	return atlas
+}
+
+load_misc_sprites :: proc(atlas: ^TextureAtlas) {
+	cursor := rl.LoadTexture("./sprites/cursor.png")
+	guy := rl.LoadTexture("./sprites/guy.png")
+	atlas.guy = guy
+	atlas.cursor = cursor
 }
 
 load_room_textures :: proc(atlas: ^TextureAtlas) {

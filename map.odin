@@ -50,10 +50,10 @@ decrease_held_index :: proc(world: ^World, state: ^MapScreenState) {
 	return
 }
 
-draw_map :: proc(world: ^World, map_state: ^MapScreenState, cursor_sprite: ^rl.Texture2D) {
+draw_map :: proc(world: ^World, map_state: ^MapScreenState, atlas: ^TextureAtlas) {
 	draw_map_grid()
 	draw_placed_map_rooms(world)
-	draw_cursor(world,map_state,cursor_sprite)
+	draw_cursor(world,map_state,atlas)
 }
 
 make_map_state :: proc() -> MapScreenState {
@@ -149,14 +149,14 @@ map_controls :: proc(world: ^World, map_state: ^MapScreenState, frametime: f32) 
 }
 
 
-draw_cursor :: proc(world: ^World, state: ^MapScreenState, cursor_sprite: ^rl.Texture2D) {
+draw_cursor :: proc(world: ^World, state: ^MapScreenState, atlas: ^TextureAtlas) {
 	switch state.mode {
 		case .Placement:
 			if room, ok := get_held_room_ptr(world,state); ok {
 				draw_map_room(world,state,room)
 			}
 		case .Selection:
-			rl.DrawTextureV(cursor_sprite^, state.cursor_displayed_vec_pos, rl.WHITE)
+			rl.DrawTextureV(atlas.cursor, state.cursor_displayed_vec_pos, rl.WHITE)
 	}
 }
 
