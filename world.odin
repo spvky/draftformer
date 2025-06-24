@@ -9,6 +9,7 @@ import rl "vendor:raylib"
 
 
 World :: struct {
+	show_collision: bool,
 	rooms: sa.Small_Array(40, MapRoom),
 	placed_map_rooms: sa.Small_Array(40,PlacedRoomEntry),
 	held_rooms: sa.Small_Array(40,^MapRoom),
@@ -16,6 +17,7 @@ World :: struct {
 	placed_world_rooms: sa.Small_Array(40, WorldRoom),
 	camera: rl.Camera2D,
 	player: Player,
+	static_colliders: sa.Small_Array(100, StaticCollider)
 }
 
 
