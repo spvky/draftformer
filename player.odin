@@ -30,12 +30,8 @@ move_player :: proc(world: ^World, frametime: f32) {
 
 player_update :: proc(world: ^World, frametime: f32) {
 	move_player(world, frametime)
-	follow_player(world)
 }
 
-follow_player :: proc (world: ^World) {
-	world.camera.target = world.player.translation
-}
 draw_player :: proc(world: ^World, atlas: ^TextureAtlas) {
 	rl.DrawTextureV(atlas.guy, world.player.translation, rl.WHITE)
 }

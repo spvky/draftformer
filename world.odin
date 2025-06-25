@@ -17,6 +17,7 @@ World :: struct {
 	placed_world_rooms: sa.Small_Array(40, WorldRoom),
 	camera: rl.Camera2D,
 	player: Player,
+	target_camera_position: Vec2,
 	static_colliders: sa.Small_Array(100, StaticCollider)
 }
 

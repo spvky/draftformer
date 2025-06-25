@@ -46,6 +46,7 @@ main :: proc() {
 
 		toggle_map(&world, &map_state)
 		player_update(&world, frametime)
+		update_camera(&world, frametime)
 		if map_state.show_map {
 			map_controls(&world,&map_state, frametime)
 		}
