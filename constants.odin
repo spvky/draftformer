@@ -2,10 +2,12 @@ package main
 
 import rl "vendor:raylib"
 PLACEMENT_OPACITY :: 100
+// Smallest intgrid size
+WORLD_PIXEL_SIZE :: [2]f32 {8,8}
 // Drawing size for a cell on the map
 MAP_TILE_SIZE :: [2]f32 {48,48}
 // Drawing size for a cell on the world map
-WORLD_TILE_SIZE :: [2]f32 {96,96}
+WORLD_CELL_SIZE :: [2]f32 {96,96}
 // How much to offset the dropshadow on the map placement screen
 SHADOW_OFFSET :: [2]f32{-10,10}
 // Color for placement mode drop shadow
