@@ -1,5 +1,6 @@
 package main
 
+import "core:fmt"
 import sa "core:container/small_array"
 
 bake_rooms :: proc(world: ^World, state: ^MapScreenState) {
@@ -27,11 +28,12 @@ bake_rooms :: proc(world: ^World, state: ^MapScreenState) {
 }
 
 build_room_colliders :: proc(world: ^World, room: MapRoom, origin: Vec2) {
+	sa.clear(&world.static_colliders)
 	cells_length := sa.len(room.cells)
 	PixelRange :: struct {y_value: int, start: int, end: int}
-	current_range: Maybe(PixelRange)
 
 	collider_from_range :: proc(origin: Vec2, top_row: f32, bottom_row: f32, range: PixelRange) -> StaticCollider {
+		fmt.printfln("Converting Pixel range: %v to collider", range)
 		a,b,c,d: Vec2
 		a = {f32(range.start) * WORLD_PIXEL_SIZE.x,top_row} + origin
 		b = {f32(range.end + 1) * WORLD_PIXEL_SIZE.x,top_row} + origin
@@ -40,26 +42,34 @@ build_room_colliders :: proc(world: ^World, room: MapRoom, origin: Vec2) {
 		return StaticCollider {vertices = {a,b,c,d}}
 	}
 
+
 	for c in 0..<cells_length {
 		cell := sa.get(room.cells,c)
-		for j in 0..<12 {
-			top_row := f32(j) * WORLD_PIXEL_SIZE.y
-			bottom_row := f32(j + 1) * WORLD_PIXEL_SIZE.y
-			for i in 0 ..<12 {
-				switch cell.pixels[j][i] {
+		adjusted_origin := origin + Vec2{f32(cell.location.x) * WORLD_CELL_SIZE.y, f32(cell.location.y) * WORLD_CELL_SIZE.y} - (WORLD_CELL_SIZE / 2)
+		for i in 0..<12 {
+			current_range: Maybe(PixelRange)
+			top_row := f32(i) * WORLD_PIXEL_SIZE.y
+			bottom_row := f32(i + 1) * WORLD_PIXEL_SIZE.y
+			fmt.printfln("Top Row: %v, Bottom Row: %v", top_row, bottom_row)
+			for j in 0 ..<12 {
+				switch cell.pixels[i][j] {
 					case 1:
 						if range, ok := &current_range.?; ok {
-							range.end = i
-							if i == 11 {
-								sa.append(&world.static_colliders, collider_from_range(origin, top_row, bottom_row, range^))
+							range.end = j
+							if j == 11 {
+								sa.append(&world.static_colliders, collider_from_range(adjusted_origin, top_row, bottom_row, range^))
 								current_range = nil
 							}
 						} else {
-							current_range = PixelRange {y_value = j, start = i, end = i}
+							current_range = PixelRange {y_value = i, start = j, end = j}
+							if j == 11 {
+								sa.append(&world.static_colliders, collider_from_range(adjusted_origin, top_row, bottom_row, current_range.?))
+								current_range = nil
+							}
 						}
 					case:
 						if range, ok := &current_range.?; ok {
-							sa.append(&world.static_colliders, collider_from_range(origin, top_row, bottom_row, range^))
+							sa.append(&world.static_colliders, collider_from_range(adjusted_origin, top_row, bottom_row, range^))
 							current_range = nil
 						}
 				}
