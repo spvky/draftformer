@@ -18,6 +18,7 @@ bake_rooms :: proc(world: ^World, state: ^MapScreenState) {
 			rotation = f32(map_room.room_ptr.rotation) * 90,
 		}
 		sa.append(&world.placed_world_rooms, world_room)
+		build_room_colliders(world, map_room.room_ptr^, vec_origin)
 	}
 
 
@@ -25,18 +26,17 @@ bake_rooms :: proc(world: ^World, state: ^MapScreenState) {
 	state.dirty = false
 }
 
-build_room_colliders :: proc(room: MapRoom) -> sa.Small_Array(20, StaticCollider) {
+build_room_colliders :: proc(world: ^World, room: MapRoom, origin: Vec2) {
 	cells_length := sa.len(room.cells)
-	colliders: sa.Small_Array(20, StaticCollider)
 	PixelRange :: struct {y_value: int, start: int, end: int}
 	current_range: Maybe(PixelRange)
 
-	collider_from_range :: proc(top_row: f32, bottom_row: f32, range: PixelRange) -> StaticCollider {
+	collider_from_range :: proc(origin: Vec2, top_row: f32, bottom_row: f32, range: PixelRange) -> StaticCollider {
 		a,b,c,d: Vec2
-		a = {f32(range.start) * WORLD_PIXEL_SIZE.x,top_row}
-		b = {f32(range.end + 1) * WORLD_PIXEL_SIZE.x,top_row}
-		c = {f32(range.end + 1) * WORLD_PIXEL_SIZE.x,bottom_row}
-		d = {f32(range.start) * WORLD_PIXEL_SIZE.x,bottom_row}
+		a = {f32(range.start) * WORLD_PIXEL_SIZE.x,top_row} + origin
+		b = {f32(range.end + 1) * WORLD_PIXEL_SIZE.x,top_row} + origin
+		c = {f32(range.end + 1) * WORLD_PIXEL_SIZE.x,bottom_row} + origin
+		d = {f32(range.start) * WORLD_PIXEL_SIZE.x,bottom_row} + origin
 		return StaticCollider {vertices = {a,b,c,d}}
 	}
 
@@ -51,7 +51,7 @@ build_room_colliders :: proc(room: MapRoom) -> sa.Small_Array(20, StaticCollider
 						if range, ok := &current_range.?; ok {
 							range.end = i
 							if i == 11 {
-								sa.append(&colliders, collider_from_range(top_row, bottom_row, range^))
+								sa.append(&world.static_colliders, collider_from_range(origin, top_row, bottom_row, range^))
 								current_range = nil
 							}
 						} else {
@@ -59,12 +59,11 @@ build_room_colliders :: proc(room: MapRoom) -> sa.Small_Array(20, StaticCollider
 						}
 					case:
 						if range, ok := &current_range.?; ok {
-							sa.append(&colliders, collider_from_range(top_row, bottom_row, range^))
+							sa.append(&world.static_colliders, collider_from_range(origin, top_row, bottom_row, range^))
 							current_range = nil
 						}
 				}
 			}
 		}
 	}
-	return colliders
 }

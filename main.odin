@@ -65,6 +65,7 @@ main :: proc() {
 			rl.BeginMode2D(world.camera)
 			draw_world_rooms(&world, &atlas)
 			draw_player(&world, &atlas)
+			draw_colliders(&world)
 			rl.EndMode2D()
 			rl.EndTextureMode()
 		}

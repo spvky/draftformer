@@ -132,7 +132,6 @@ read_room :: proc(tag: RoomTag) -> MapRoom {
 			}
 		}
 	}
-	fmt.printfln("Width: %v, Height: %v", width, height)
 
 	for i in 0..<10 {
 		for j in 0..<10 {
