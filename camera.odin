@@ -13,6 +13,7 @@ clamp_camera_target :: proc(world: ^World, frametime: f32) {
 }
 
 update_camera :: proc(world: ^World, frametime: f32) {
-	clamp_camera_target(world,frametime)
-	move_camera(world, frametime)
+	// clamp_camera_target(world,frametime)
+	// move_camera(world, frametime)
+	// world.camera.target = world.player.translation
 }

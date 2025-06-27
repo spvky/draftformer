@@ -9,7 +9,6 @@ Vec2 :: [2]f32
 
 SCREEN_WIDTH :: 1600
 SCREEN_HEIGHT :: 900
-game_state := GameState{mode = .Map}
 
 main :: proc() {
 	when ODIN_DEBUG {
@@ -45,10 +44,11 @@ main :: proc() {
 		frametime:= rl.GetFrameTime()
 
 		toggle_map(&world, &map_state)
-		player_update(&world, frametime)
 		update_camera(&world, frametime)
-		if map_state.show_map {
+		if world.game_state == .Map {
 			map_controls(&world,&map_state, frametime)
+		} else {
+			player_update(&world, frametime)
 		}
 
 		// Map Screen pass
@@ -83,7 +83,7 @@ main :: proc() {
 
 
 		// If we should show the map, draw it's render texture to the screen
-		if map_state.show_map {
+		if world.game_state == .Map {
 		rl.DrawTexturePro(
 			map_screen.texture,
 			rl.Rectangle{x = 250, y = 50, width = 780, height = -780},

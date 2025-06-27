@@ -107,10 +107,10 @@ handle_cursor :: proc(map_state: ^MapScreenState, frametime: f32) {
 
 toggle_map :: proc(world: ^World, map_state: ^MapScreenState) {
 	if rl.IsKeyPressed(.M) {
-		if map_state.show_map {
+		if world.game_state == .Map {
 			bake_rooms(world, map_state)
 		}
-		map_state.show_map = !map_state.show_map
+		world.game_state = .Platforming
 	}
 }
 map_controls :: proc(world: ^World, map_state: ^MapScreenState, frametime: f32) {

@@ -18,7 +18,9 @@ World :: struct {
 	camera: rl.Camera2D,
 	player: Player,
 	target_camera_position: Vec2,
-	static_colliders: sa.Small_Array(1000, StaticCollider)
+	static_colliders: sa.Small_Array(1000, StaticCollider),
+	physics_steps: u8,
+	game_state: GameState
 }
 
 
@@ -39,10 +41,11 @@ make_world :: proc() -> World {
 
 	camera := rl.Camera2D {
 		target = {0,0},
-		zoom = 10
+		zoom = 1
 	}
 
 	return World {
+		game_state = .Map,
 		rooms = rooms,
 		held_rooms = held_rooms,
 		camera = camera

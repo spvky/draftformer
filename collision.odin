@@ -8,10 +8,38 @@ StaticCollider :: struct {
 	vertices: [4]Vec2
 }
 
-collider_size :: proc(using collider: StaticCollider) -> Vec2 {
-	width := math.abs(vertices[0].x - vertices[1].x)
-	height := math.abs(vertices[0].y - vertices[2].y)
-	return Vec2{width,height}
+ColliderIter :: struct {
+	colliders: sa.Small_Array(1000, StaticCollider),
+	index: int
+}
+
+collider_make_iter :: proc(colliders: sa.Small_Array(1000, StaticCollider)) -> ColliderIter {
+		return ColliderIter {colliders = colliders}
+}
+
+iter_collider :: proc(it: ^ColliderIter) -> (val: StaticCollider, cond: bool) {
+	in_range := it.index < sa.len(it.colliders)
+
+	for in_range {
+		val := sa.get(it.colliders, it.index)
+		cond = true
+		it.index += 1
+		return
+	}
+	return
+}
+
+iter_collider_ptr :: proc(it: ^ColliderIter) -> (val: ^StaticCollider, cond: bool) {
+	in_range := it.index < sa.len(it.colliders)
+
+	for in_range {
+		collider := sa.get(it.colliders, it.index)
+		val = &collider
+		cond = true
+		it.index += 1
+		return
+	}
+	return
 }
 
 draw_colliders :: proc(world: ^World) {
