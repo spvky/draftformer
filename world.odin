@@ -39,7 +39,7 @@ make_world :: proc() -> World {
 
 	camera := rl.Camera2D {
 		target = {0,0},
-		zoom = 1
+		zoom = 10
 	}
 
 	return World {
