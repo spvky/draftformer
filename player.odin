@@ -29,7 +29,7 @@ player_locomotion :: proc(world: ^World, frametime: f32) {
 	// 	delta.y += 1
 	// }
 	if delta != {0,0} {
-		world.player.velocity.x += l.normalize(delta).x * frametime * 50
+		world.player.velocity.x = l.normalize(delta).x * frametime * 50
 	} else {
 		world.player.velocity.x = 0
 	}
@@ -46,32 +46,37 @@ apply_player_velocity :: proc(world: ^World) {
 	// fmt.printfln("Player Translation: %v\nPlayer Velocity: %v", world.player.translation, world.player.velocity)
 }
 
-player_collision_with_scene :: proc(world: ^World) {
+player_collision :: proc(world: ^World) -> Vec2 {
+	player := &world.player
+	player.grounded = false
 	iter := collider_make_iter(world.static_colliders)
 
+	player_collider:= br.Sphere {translation = br.extend(player.translation + Vec2{8,8},0), radius = 8}
+
 	for collider in iter_collider_ptr(&iter) {
-		player_center := world.player.translation + world.player.velocity + Vec2 {8,8}
-		// player_capsule := br.Capsule {translation = br.extend(player_center, 0), height = 16, radius = 8}
-		player_capsule := br.Sphere {translation = br.extend(player_center, 0), radius = 8}
-		player_sphere := br.Sphere{ translation = br.extend(world.player.translation + Vec2 {8,16}, 0), radius = 2}
-		collider_points := [4][3]f32 {
+		points := [?]br.Vec3 {
 			br.extend(collider.vertices[0],0),
 			br.extend(collider.vertices[1],0),
 			br.extend(collider.vertices[2],0),
 			br.extend(collider.vertices[3],0),
 		}
-		world.player.grounded = br.gjk(player_sphere, collider_points[:])
-		if br.gjk(player_capsule, collider_points[:]) {
-			world.player.velocity.y = 0
+
+
+		collision := br.gjk(points[:], player_collider)
+		if collision {
+			player^.grounded = true
+			player.velocity.y = 0
 		}
 	}
+	return player_collider.translation.xy
 }
 
-player_update :: proc(world: ^World, frametime: f32) {
+player_update :: proc(world: ^World, frametime: f32) -> Vec2 {
 	player_locomotion(world, frametime)
 	apply_player_gravity(world, frametime)
-	player_collision_with_scene(world)
+	debug := player_collision(world)
 	apply_player_velocity(world)
+	return debug;
 }
 
 draw_player :: proc(world: ^World, atlas: ^TextureAtlas) {

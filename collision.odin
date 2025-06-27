@@ -33,8 +33,7 @@ iter_collider_ptr :: proc(it: ^ColliderIter) -> (val: ^StaticCollider, cond: boo
 	in_range := it.index < sa.len(it.colliders)
 
 	for in_range {
-		collider := sa.get(it.colliders, it.index)
-		val = &collider
+		val = sa.get_ptr(&it.colliders, it.index)
 		cond = true
 		it.index += 1
 		return
