@@ -13,6 +13,66 @@ ColliderIter :: struct {
 	index: int
 }
 
+AABB :: struct {
+	min: Vec2,
+	max: Vec2
+}
+
+Triangle :: struct {
+	vertices: [3]Vec2
+}
+
+Sphere :: struct {
+	translation: Vec2,
+	radius: f32
+}
+
+CollisionData :: struct {
+	collision_point: Vec2,
+	collision_normal: Vec2,
+	penetration_depth: f32
+}
+
+aabb_triangles :: proc(aabb: AABB) -> [2]Triangle {
+	return [2]Triangle {
+		{
+			vertices = {
+				aabb.min,
+				{aabb.max.x, aabb.min.y},
+				aabb.max
+			}
+		},
+		{
+			vertices = {
+			aabb.min,
+			aabb.max,
+			{aabb.min.x, aabb.max.y}
+			}
+		}
+	}
+}
+
+aabb_nearest :: proc(aabb: AABB, point: Vec2) -> Vec2 {
+	return Vec2{
+		math.clamp(point.x, aabb.min.x, aabb.max.x),
+		math.clamp(point.y, aabb.min.y, aabb.max.y),
+	}
+}
+
+sphere_aabb_collision :: proc(s: Sphere, b: AABB) -> (data: CollisionData, colliding: bool){
+	nearest := aabb_nearest(b,s.translation)
+	colliding = l.distance(nearest, s.translation) < s.radius
+	if !colliding do return
+	collision_vector := s.translation - nearest
+	penetration_depth := s.radius - l.length(collision_vector)
+	data = CollisionData {
+		collision_normal = l.normalize(collision_vector),
+		collision_point = nearest,
+		penetration_depth = penetration_depth,
+	}
+	return
+}
+
 collider_make_iter :: proc(colliders: sa.Small_Array(1000, StaticCollider)) -> ColliderIter {
 		return ColliderIter {colliders = colliders}
 }
