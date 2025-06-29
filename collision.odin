@@ -2,14 +2,12 @@ package main
 
 import "core:math"
 import sa "core:container/small_array"
+import l "core:math/linalg"
 import rl "vendor:raylib"
 
-StaticCollider :: struct {
-	vertices: [4]Vec2
-}
 
-ColliderIter :: struct {
-	colliders: sa.Small_Array(1000, StaticCollider),
+AABBIter :: struct {
+	aabbs: sa.Small_Array(1000, AABB),
 	index: int
 }
 
@@ -33,7 +31,7 @@ CollisionData :: struct {
 	penetration_depth: f32
 }
 
-aabb_triangles :: proc(aabb: AABB) -> [2]Triangle {
+bb_triangles :: proc(aabb: AABB) -> [2]Triangle {
 	return [2]Triangle {
 		{
 			vertices = {
@@ -52,15 +50,24 @@ aabb_triangles :: proc(aabb: AABB) -> [2]Triangle {
 	}
 }
 
-aabb_nearest :: proc(aabb: AABB, point: Vec2) -> Vec2 {
+bb_vertices :: proc(a: AABB) -> [4]Vec2 {
+	return [?]Vec2 {
+		{a.min.x,a.min.y},
+		{a.max.x,a.min.y},
+		{a.max.x,a.max.y},
+		{a.min.x,a.max.y},
+	}
+}
+
+bb_nearest :: proc(aabb: AABB, point: Vec2) -> Vec2 {
 	return Vec2{
 		math.clamp(point.x, aabb.min.x, aabb.max.x),
 		math.clamp(point.y, aabb.min.y, aabb.max.y),
 	}
 }
 
-sphere_aabb_collision :: proc(s: Sphere, b: AABB) -> (data: CollisionData, colliding: bool){
-	nearest := aabb_nearest(b,s.translation)
+sphere_bb_collision :: proc(s: Sphere, b: AABB) -> (data: CollisionData, colliding: bool){
+	nearest := bb_nearest(b,s.translation)
 	colliding = l.distance(nearest, s.translation) < s.radius
 	if !colliding do return
 	collision_vector := s.translation - nearest
@@ -73,15 +80,15 @@ sphere_aabb_collision :: proc(s: Sphere, b: AABB) -> (data: CollisionData, colli
 	return
 }
 
-collider_make_iter :: proc(colliders: sa.Small_Array(1000, StaticCollider)) -> ColliderIter {
-		return ColliderIter {colliders = colliders}
+bb_make_iter :: proc(aabbs: sa.Small_Array(1000, AABB)) -> AABBIter {
+		return AABBIter {aabbs = aabbs}
 }
 
-iter_collider :: proc(it: ^ColliderIter) -> (val: StaticCollider, cond: bool) {
-	in_range := it.index < sa.len(it.colliders)
+iter_bb :: proc(it: ^AABBIter) -> (val: AABB, cond: bool) {
+	in_range := it.index < sa.len(it.aabbs)
 
 	for in_range {
-		val := sa.get(it.colliders, it.index)
+		val := sa.get(it.aabbs, it.index)
 		cond = true
 		it.index += 1
 		return
@@ -89,11 +96,11 @@ iter_collider :: proc(it: ^ColliderIter) -> (val: StaticCollider, cond: bool) {
 	return
 }
 
-iter_collider_ptr :: proc(it: ^ColliderIter) -> (val: ^StaticCollider, cond: bool) {
-	in_range := it.index < sa.len(it.colliders)
+iter_bb_ptr :: proc(it: ^AABBIter) -> (val: ^AABB, cond: bool) {
+	in_range := it.index < sa.len(it.aabbs)
 
 	for in_range {
-		val = sa.get_ptr(&it.colliders, it.index)
+		val = sa.get_ptr(&it.aabbs, it.index)
 		cond = true
 		it.index += 1
 		return
@@ -105,10 +112,14 @@ draw_colliders :: proc(world: ^World) {
 	length := sa.len(world.static_colliders)
 	for i in 0..<length {
 		collider := sa.get(world.static_colliders, i)
-		rl.DrawTriangle(collider.vertices[2], collider.vertices[1], collider.vertices[0], rl.RED)
-		rl.DrawTriangle(collider.vertices[3], collider.vertices[2], collider.vertices[0], rl.RED)
-		for j in 0..<4 {
-			rl.DrawCircleV(collider.vertices[j], 0.5,rl.PINK)
+		triangles := bb_triangles(collider)
+		verts := bb_vertices(collider)
+		for t in triangles {
+			using t
+			rl.DrawTriangle(vertices[2], vertices[1], vertices[0], rl.RED)
+		}
+		for v in verts {
+			rl.DrawCircleV(v, 0.5,rl.PINK)
 		}
 	}
 }

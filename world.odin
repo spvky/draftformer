@@ -18,7 +18,7 @@ World :: struct {
 	camera: rl.Camera2D,
 	player: Player,
 	target_camera_position: Vec2,
-	static_colliders: sa.Small_Array(1000, StaticCollider),
+	static_colliders: sa.Small_Array(1000, AABB),
 	physics_steps: u8,
 	game_state: GameState
 }
@@ -29,7 +29,6 @@ PlacedRoomEntry :: struct {
 	origin: Tile,
 }
 
-import br "shared:bragi"
 make_world :: proc() -> World {
 	rooms: sa.Small_Array(40, MapRoom)
 	held_rooms: sa.Small_Array(40,^MapRoom)
@@ -44,34 +43,9 @@ make_world :: proc() -> World {
 		target = {0,0},
 		zoom = 1
 	}
-	colliders: sa.Small_Array(1000, StaticCollider)
-	collider_1 := StaticCollider {
-		vertices = [4]Vec2{
-			{-10, 50},
-			{100, 50},
-			{100, 80},
-			{-10, 80}
-		}
-	}
-	col_verts := [4]br.Vec3{
-		br.extend(collider_1.vertices[0],0),
-		br.extend(collider_1.vertices[1],0),
-		br.extend(collider_1.vertices[2],0),
-		br.extend(collider_1.vertices[3],0),
-	}
-	sa.append(&colliders, collider_1)
-	player: Player
 
-	collision := br.gjk(col_verts[:], br.Sphere {translation = br.extend(player.translation + Vec2 {8,8},0), radius = 8})
-	if collision {
-		fmt.println("COLLISION WITH FIRST PLATFORM!!!!")
-	} else {
-		fmt.println("NO COLLISION, EVERYTHING IS GOOD")
-	}
 	return World {
-		player = player,
-		game_state = .Platforming,
-		static_colliders = colliders,
+		game_state = .Map,
 		rooms = rooms,
 		held_rooms = held_rooms,
 		camera = camera
