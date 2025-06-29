@@ -1,7 +1,6 @@
 package main
 
 import "core:fmt"
-import br "shared:bragi"
 import rl "vendor:raylib"
 import l "core:math/linalg"
 
@@ -22,12 +21,6 @@ player_locomotion :: proc(world: ^World, frametime: f32) {
 	if rl.IsKeyDown(.D) {
 		delta.x += 1
 	}
-	// if rl.IsKeyDown(.W) {
-	// 	delta.y -= 1
-	// }
-	// if rl.IsKeyDown(.S) {
-	// 	delta.y += 1
-	// }
 	if delta != {0,0} {
 		world.player.velocity.x = l.normalize(delta).x * frametime * 50
 	} else {
@@ -43,27 +36,18 @@ apply_player_gravity :: proc(world: ^World, frametime: f32) {
 
 apply_player_velocity :: proc(world: ^World) {
 	world.player.translation += world.player.velocity
-	// fmt.printfln("Player Translation: %v\nPlayer Velocity: %v", world.player.translation, world.player.velocity)
 }
 
 player_collision :: proc(world: ^World) -> Vec2 {
 	player := &world.player
 	player.grounded = false
-	iter := collider_make_iter(world.static_colliders)
+	iter := bb_make_iter(world.static_colliders)
 
-	player_collider:= br.Sphere {translation = br.extend(player.translation + Vec2{8,8},0), radius = 8}
+	player_collider:= Sphere {translation = player.translation + Vec2{8,8}, radius = 8}
 
-	for collider in iter_collider_ptr(&iter) {
-		points := [?]br.Vec3 {
-			br.extend(collider.vertices[0],0),
-			br.extend(collider.vertices[1],0),
-			br.extend(collider.vertices[2],0),
-			br.extend(collider.vertices[3],0),
-		}
-
-
-		collision := br.gjk(points[:], player_collider)
-		if collision {
+	for collider in iter_bb_ptr(&iter) {
+		collision, colliding := sphere_bb_collision(player_collider, collider^)
+		if colliding {
 			player^.grounded = true
 			player.velocity.y = 0
 		}
