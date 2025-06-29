@@ -36,7 +36,6 @@ build_room_colliders :: proc(world: ^World, placed_room: PlacedRoomEntry) {
 		aabb: AABB
 		aabb.min = {f32(range.start) * WORLD_PIXEL_SIZE.x, f32(range.y_value) * WORLD_PIXEL_SIZE.y} + origin
 		aabb.max = {f32(range.end + 1) * WORLD_PIXEL_SIZE.x, f32(range.y_value + 1) * WORLD_PIXEL_SIZE.y} + origin
-		fmt.printfln("New Collider: %v", aabb)
 		return aabb
 	}
 

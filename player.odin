@@ -38,29 +38,27 @@ apply_player_velocity :: proc(world: ^World) {
 	world.player.translation += world.player.velocity
 }
 
-player_collision :: proc(world: ^World) -> Vec2 {
+player_collision :: proc(world: ^World) {
 	player := &world.player
 	player.grounded = false
 	iter := bb_make_iter(world.static_colliders)
 
-	player_collider:= Sphere {translation = player.translation + Vec2{8,8}, radius = 8}
+	player_collider:= Sphere {translation = player.translation + Vec2{8,8}, radius = 7}
 
 	for collider in iter_bb_ptr(&iter) {
 		collision, colliding := sphere_bb_collision(player_collider, collider^)
 		if colliding {
-			player^.grounded = true
-			player.velocity.y = 0
+			// player^.grounded = true
+			player.velocity -= collision.collision_normal * l.dot(player.velocity, collision.collision_normal)
 		}
 	}
-	return player_collider.translation.xy
 }
 
-player_update :: proc(world: ^World, frametime: f32) -> Vec2 {
+player_update :: proc(world: ^World, frametime: f32) {
 	player_locomotion(world, frametime)
 	apply_player_gravity(world, frametime)
-	debug := player_collision(world)
+	player_collision(world)
 	apply_player_velocity(world)
-	return debug;
 }
 
 draw_player :: proc(world: ^World, atlas: ^TextureAtlas) {

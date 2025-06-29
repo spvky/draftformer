@@ -43,14 +43,12 @@ main :: proc() {
 
 		frametime:= rl.GetFrameTime()
 
-		capsule_pos: Vec2
-
 		toggle_map(&world, &map_state)
 		update_camera(&world, frametime)
 		if world.game_state == .Map {
 			map_controls(&world,&map_state, frametime)
 		} else {
-			capsule_pos = player_update(&world, frametime)
+			player_update(&world, frametime)
 		}
 
 		// Map Screen pass
@@ -69,7 +67,6 @@ main :: proc() {
 			draw_player(&world, &atlas)
 			draw_colliders(&world)
 
-			rl.DrawCircleV(capsule_pos, 8, rl.BLACK)
 			rl.EndMode2D()
 			rl.EndTextureMode()
 		}
