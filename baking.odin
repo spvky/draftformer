@@ -43,8 +43,8 @@ build_room_colliders :: proc(world: ^World, placed_room: PlacedRoomEntry) {
 
 	cell_iter := cell_make_iter(cells = room.cells, origin = placed_room.origin, rotation = room.rotation)
 	for cell in iter_cell(&cell_iter) {
-	cell_origin := Vec2{f32(cell.location.x) * WORLD_CELL_SIZE.x, f32(cell.location.y) * WORLD_CELL_SIZE.y}
-	vec_origin := Vec2{f32(placed_room.origin.x) * WORLD_CELL_SIZE.x, f32(placed_room.origin.y) * WORLD_CELL_SIZE.y}
+		cell_origin := Vec2{f32(cell.location.x) * WORLD_CELL_SIZE.x, f32(cell.location.y) * WORLD_CELL_SIZE.y}
+		vec_origin := Vec2{f32(placed_room.origin.x) * WORLD_CELL_SIZE.x, f32(placed_room.origin.y) * WORLD_CELL_SIZE.y}
 		adjusted_origin := cell_origin - (WORLD_CELL_SIZE / 2)
 		for i in 0..<12 {
 			current_range: Maybe(PixelRange)
