@@ -40,9 +40,7 @@ main :: proc() {
 	defer delete_world(world)
 
 	main_block: for !rl.WindowShouldClose() {
-
 		frametime:= rl.GetFrameTime()
-
 		toggle_map(&world, &map_state)
 		update_camera(&world, frametime)
 		if world.game_state == .Map {
@@ -65,14 +63,13 @@ main :: proc() {
 			rl.BeginMode2D(world.camera)
 			draw_world_rooms(&world, &atlas)
 			draw_player(&world, &atlas)
-			draw_colliders(&world)
-
+			// draw_colliders(&world)
+			// debug_ui(&world)
 			rl.EndMode2D()
 			rl.EndTextureMode()
 		}
 
 		rl.BeginDrawing()
-
 		rl.DrawTexturePro(
 			gameplay_screen.texture,
 			rl.Rectangle{width = 1600, height = -900},
@@ -81,21 +78,19 @@ main :: proc() {
 			0,
 			rl.WHITE
 		)
-
 		// If we should show the map, draw it's render texture to the screen
 		if world.game_state == .Map {
-		rl.DrawTexturePro(
-			map_screen.texture,
-			rl.Rectangle{x = 250, y = 50, width = 780, height = -780},
-			rl.Rectangle{x = 550, y = 200, width = 500, height = 500},
-			{0,0},
-			0,
-			rl.WHITE
-		)
+			rl.DrawTexturePro(
+				map_screen.texture,
+				rl.Rectangle{x = 250, y = 50, width = 780, height = -780},
+				rl.Rectangle{x = 550, y = 200, width = 500, height = 500},
+				{0,0},
+				0,
+				rl.WHITE
+			)
 		}
 		rl.EndDrawing()
 		free_all(context.temp_allocator)
 	}
 	rl.UnloadRenderTexture(map_screen)
 }
-
