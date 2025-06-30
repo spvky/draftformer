@@ -42,7 +42,6 @@ apply_player_velocity :: proc(world: ^World, frametime: f32) {
 player_jump :: proc(world: ^World, frametime: f32) {
 	player := &world.player
 	if rl.IsKeyPressed(.SPACE) && player.grounded {
-		fmt.printfln("Jump Event: %v", rl.GetTime())
 		player.velocity.y = -100
 	}
 }
