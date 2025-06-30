@@ -82,7 +82,6 @@ main :: proc() {
 			rl.WHITE
 		)
 
-
 		// If we should show the map, draw it's render texture to the screen
 		if world.game_state == .Map {
 		rl.DrawTexturePro(
